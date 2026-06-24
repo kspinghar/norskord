@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NorskOrd — Vocabulary Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d0f14;
+  --surface: #13161e;
+  --surface2: #1a1e2a;
+  --border: #252a38;
+  --accent: #4f8ef7;
+  --green: #3ecf8e;
+  --red: #f76f6f;
+  --yellow: #f7c948;
+  --purple: #a78bfa;
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --muted2: #9ca3af;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.app { max-width: 820px; margin: 0 auto; padding: 32px 20px 60px; }
+
+/* HEADER */
+.header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+}
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.5px; }
+.logo span { color: var(--accent); }
+.logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 4px; }
+.stats { display: flex; gap: 10px; }
+.stat { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 11px; color: var(--muted2); }
+.stat strong { color: var(--accent); }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 28px; }
+.tab { flex: 1; padding: 10px; background: none; border: none; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; border-radius: 7px; transition: all 0.18s; letter-spacing: 0.5px; }
+.tab.active { background: var(--surface2); color: var(--text); }
+
+/* SEARCH */
+.search-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.search-row { display: flex; gap: 10px; }
+.search-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 15px; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--muted); }
+.lang-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.lang-btn { padding: 14px 16px; background: none; border: none; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+.lang-btn.active { background: var(--accent); color: #fff; }
+.lookup-btn { background: var(--accent); border: none; border-radius: 8px; padding: 14px 24px; color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; letter-spacing: 0.5px; transition: opacity 0.2s, transform 0.1s; white-space: nowrap; }
+.lookup-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.lookup-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* STATES */
+.loading-state { text-align: center; padding: 52px; color: var(--muted2); }
+.dots span { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin: 0 3px; animation: bounce 1.2s infinite; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0);opacity:.4} 40%{transform:translateY(-8px);opacity:1} }
+.loading-text { margin-top: 14px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.error-box { background: rgba(247,111,111,.08); border: 1px solid rgba(247,111,111,.25); border-radius: 8px; padding: 14px 18px; color: var(--red); font-size: 13px; margin-bottom: 20px; }
+
+/* ENTRY CARD */
+.entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-top: 24px; animation: fadeUp 0.28s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.entry-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; gap: 16px; }
+.entry-word { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 36px; letter-spacing: -1.5px; line-height: 1; }
+.entry-meta { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+.tag { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; font-weight: 500; white-space: nowrap; }
+.tag-verb    { background: rgba(79,142,247,.12); color: var(--accent); border: 1px solid rgba(79,142,247,.3); }
+.tag-noun    { background: rgba(167,139,250,.12); color: var(--purple); border: 1px solid rgba(167,139,250,.3); }
+.tag-adjective { background: rgba(247,201,72,.12); color: var(--yellow); border: 1px solid rgba(247,201,72,.3); }
+.tag-adverb  { background: rgba(62,207,142,.12); color: var(--green); border: 1px solid rgba(62,207,142,.3); }
+.tag-phrase  { background: rgba(247,111,111,.12); color: var(--red); border: 1px solid rgba(247,111,111,.3); }
+.tag-other, .tag-conjunction, .tag-preposition { background: rgba(107,114,128,.12); color: var(--muted2); border: 1px solid rgba(107,114,128,.3); }
+.tag-en { background: rgba(62,207,142,.1); color: var(--green); border: 1px solid rgba(62,207,142,.2); }
+
+.save-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; color: var(--muted2); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+.save-btn:hover { border-color: var(--green); color: var(--green); }
+.save-btn.saved { background: rgba(62,207,142,.1); border-color: var(--green); color: var(--green); }
+
+.sec-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 20px 0 10px; }
+.sec-title:first-of-type { margin-top: 0; }
+
+.trans-box { background: var(--surface2); border-radius: 8px; padding: 14px 18px; font-size: 16px; color: var(--text); border-left: 3px solid var(--accent); line-height: 1.5; }
+
+.forms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.form-item { background: var(--surface2); border-radius: 7px; padding: 10px 14px; }
+.form-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.form-value { font-size: 14px; color: var(--text); }
+
+.ex-box { background: var(--surface2); border-radius: 8px; padding: 14px 18px; margin-bottom: 8px; line-height: 1.7; }
+.ex-no { color: var(--text); font-size: 13px; }
+.ex-en { color: var(--muted2); font-size: 12px; font-style: italic; margin-top: 4px; }
+
+.gram-note { background: rgba(247,201,72,.06); border: 1px solid rgba(247,201,72,.2); border-radius: 8px; padding: 13px 16px; font-size: 12px; color: var(--muted2); line-height: 1.7; }
+
+.related-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.rel-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 12px; color: var(--muted2); cursor: pointer; transition: all 0.18s; }
+.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* SAVED LIST */
+.saved-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.saved-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; }
+.export-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 7px 14px; color: var(--muted2); font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+.export-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+.filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.f-chip { padding: 5px 12px; border-radius: 5px; font-size: 11px; border: 1px solid var(--border); background: none; color: var(--muted2); cursor: pointer; transition: all 0.18s; font-family: 'DM Mono', monospace; }
+.f-chip.active, .f-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,.08); }
+
+.empty-state { text-align: center; padding: 52px 20px; color: var(--muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 12px; line-height: 1.8; }
+
+.saved-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: border-color 0.18s; margin-bottom: 8px; }
+.saved-item:hover { border-color: var(--accent); }
+.si-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
+.si-word { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; white-space: nowrap; }
+.si-trans { font-size: 12px; color: var(--muted2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.si-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; transition: color 0.2s; line-height: 1; }
+.del-btn:hover { color: var(--red); }
+
+/* MODAL */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+.modal-close { position: absolute; top: 18px; right: 18px; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+.modal-close:hover { color: var(--text); }
+
+/* ONBOARDING */
+.onboard-bg { position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.onboard-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px; max-width: 520px; width: 100%; animation: fadeUp 0.3s ease; }
+.onboard-step { display: none; }
+.onboard-step.active { display: block; }
+.onboard-icon { font-size: 48px; margin-bottom: 16px; }
+.onboard-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; margin-bottom: 10px; letter-spacing: -0.5px; }
+.onboard-body { font-size: 13px; color: var(--muted2); line-height: 1.8; margin-bottom: 24px; }
+.onboard-dots { display: flex; gap: 6px; margin-bottom: 24px; }
+.onboard-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+.onboard-dot.active { background: var(--accent); }
+.onboard-nav { display: flex; gap: 10px; }
+.onboard-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; }
+.onboard-btn-primary { background: var(--accent); color: #fff; }
+.onboard-btn-secondary { background: var(--surface2); color: var(--muted2); }
+
+/* LANG SELECTOR */
+.lang-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
+.lang-option { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.18s; }
+.lang-option:hover { border-color: var(--accent); }
+.lang-option.selected { border-color: var(--accent); background: rgba(79,142,247,.1); }
+.lang-option .flag { font-size: 24px; margin-bottom: 4px; }
+.lang-option .lang-name { font-size: 11px; color: var(--muted2); }
+
+/* HELP TAB */
+.help-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+.help-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.help-step { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+.help-step-num { background: var(--accent); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+.help-step-text { font-size: 13px; color: var(--muted2); line-height: 1.7; }
+.help-step-text strong { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ONBOARDING OVERLAY -->
+  <div id="onboard-bg" class="onboard-bg" style="display:none">
+    <div class="onboard-card">
+      <div class="onboard-dots" id="onboard-dots"></div>
+
+      <!-- Step 0: Language selection -->
+      <div class="onboard-step active" id="onboard-step-0">
+        <div class="onboard-icon">🌍</div>
+        <div class="onboard-title" data-i18n="onboard_lang_title">Choose your language</div>
+        <div class="onboard-body" data-i18n="onboard_lang_body">NorskOrd will explain Norwegian words and grammar in your native language.</div>
+        <div class="lang-grid" id="lang-grid"></div>
+      </div>
+
+      <!-- Step 1: Welcome -->
+      <div class="onboard-step" id="onboard-step-1">
+        <div class="onboard-icon">🇳🇴</div>
+        <div class="onboard-title" data-i18n="onboard_welcome_title">Welcome to NorskOrd</div>
+        <div class="onboard-body" data-i18n="onboard_welcome_body">Your personal Norwegian vocabulary builder. Look up any word or phrase and get a full linguistic breakdown — translation, pronunciation, word forms, grammar notes and examples.</div>
+      </div>
+
+      <!-- Step 2: My Words -->
+      <div class="onboard-step" id="onboard-step-2">
+        <div class="onboard-icon">⊡</div>
+        <div class="onboard-title" data-i18n="onboard_words_title">Build your word bank</div>
+        <div class="onboard-body" data-i18n="onboard_words_body">Save the words you want to remember. Filter by verbs, nouns, adjectives and phrases. Tap any saved word to see its full entry again. Export your word bank anytime as a JSON backup.</div>
+      </div>
+
+      <!-- Step 3: HFW -->
+      <div class="onboard-step" id="onboard-step-3">
+        <div class="onboard-icon">◈</div>
+        <div class="onboard-title" data-i18n="onboard_hfw_title">High Frequency Words</div>
+        <div class="onboard-body" data-i18n="onboard_hfw_body">Track your progress through the 500 most common Norwegian words across three tiers. The top 500 words cover 85% of everyday Norwegian speech.</div>
+      </div>
+
+      <!-- Step 4: Idioms -->
+      <div class="onboard-step" id="onboard-step-4">
+        <div class="onboard-icon">❞</div>
+        <div class="onboard-title" data-i18n="onboard_idioms_title">Discover idioms</div>
+        <div class="onboard-body" data-i18n="onboard_idioms_body">Look up Norwegian idioms, generate random ones by theme, or find the Norwegian equivalent of an English idiom. Idioms reveal how Norwegians actually think.</div>
+      </div>
+
+      <!-- Step 5: How to use -->
+      <div class="onboard-step" id="onboard-step-5">
+        <div class="onboard-icon">✓</div>
+        <div class="onboard-title" data-i18n="onboard_ready_title">You're ready</div>
+        <div class="onboard-body" data-i18n="onboard_ready_body">NorskOrd works inside Claude or ChatGPT — just upload this HTML file to your chat. Your word bank, idioms and progress are saved automatically. Visit the Help tab anytime for a reminder.</div>
+      </div>
+
+      <div class="onboard-nav">
+        <button class="onboard-btn onboard-btn-secondary" id="onboard-back" onclick="onboardNav(-1)" style="display:none" data-i18n="onboard_back">Back</button>
+        <button class="onboard-btn onboard-btn-primary" id="onboard-next" onclick="onboardNav(1)" data-i18n="onboard_next">Get started →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="logo">Norsk<span>Ord</span></div>
+      <div class="logo-sub" id="logo-sub-lang">Vocabulary Builder · B1 Track</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span data-i18n="stat_saved">Saved</span>: <strong id="n-saved">0</strong></div>
+      <div class="stat"><span data-i18n="stat_session">Session</span>: <strong id="n-session">0</strong></div>
+      <button onclick="showLangPicker()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'" id="lang-flag-btn">🌍 EN</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tab-btn-lookup" onclick="switchTab('lookup')">⌕  <span data-i18n="tab_lookup">Lookup</span></button>
+    <button class="tab" id="tab-btn-saved" onclick="switchTab('saved')">⊡  <span data-i18n="tab_words">My Words</span></button>
+    <button class="tab" id="tab-btn-hfw" onclick="switchTab('hfw')">◈  <span data-i18n="tab_hfw">HFW</span></button>
+    <button class="tab" id="tab-btn-idioms" onclick="switchTab('idioms')">❞  <span data-i18n="tab_idioms">Idioms</span></button>
+    <button class="tab" id="tab-btn-help" onclick="switchTab('help')">?  <span data-i18n="tab_help">Help</span></button>
+  </div>
+
+  <!-- LOOKUP TAB -->
+  <div id="pane-lookup">
+    <div class="search-label" data-i18n="lookup_label">Enter a word or phrase</div>
+    <div class="search-row">
+      <input id="q" class="search-input" placeholder="e.g. to fetch / hente / jeg vil gjerne..." autocomplete="off" />
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="btn-no" onclick="setLang('no')">NO</button>
+      </div>
+      <button class="lookup-btn" id="go-btn" onclick="doLookup()" data-i18n="lookup_btn">Look up</button>
+    </div>
+    <div id="err"></div>
+    <div id="loading"></div>
+    <div id="result"></div>
+  </div>
+
+  <!-- SAVED TAB -->
+  <div id="pane-saved" style="display:none">
+    <div class="saved-header">
+      <div class="saved-title" data-i18n="words_title">My Word Bank</div>
+      <button class="export-btn" onclick="doExport()" data-i18n="words_export">↓ Export JSON</button>
+    </div>
+    <div class="filter-bar">
+      <button class="f-chip active" onclick="setFilter('all',this)" data-i18n="filter_all">All</button>
+      <button class="f-chip" onclick="setFilter('verb',this)" data-i18n="filter_verbs">Verbs</button>
+      <button class="f-chip" onclick="setFilter('noun',this)" data-i18n="filter_nouns">Nouns</button>
+      <button class="f-chip" onclick="setFilter('adjective',this)" data-i18n="filter_adj">Adjectives</button>
+      <button class="f-chip" onclick="setFilter('phrase',this)" data-i18n="filter_phrases">Phrases</button>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+
+  <!-- HFW TAB -->
+  <div id="pane-hfw" style="display:none">
+    <div class="saved-header">
+      <div class="saved-title" data-i18n="hfw_title">High Frequency Words</div>
+      <button class="export-btn" onclick="copyHFW()" data-i18n="hfw_copy">⎘ Copy to chat</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
+      <div class="form-item" style="text-align:center">
+        <div class="form-label">Tier</div>
+        <div class="form-value" style="font-size:22px;font-family:'Syne',sans-serif;font-weight:800" id="hfw-tier">1</div>
+      </div>
+      <div class="form-item" style="text-align:center">
+        <div class="form-label">Words Covered</div>
+        <div class="form-value" style="font-size:22px;font-family:'Syne',sans-serif;font-weight:800;color:var(--accent)" id="hfw-covered">0</div>
+      </div>
+      <div class="form-item" style="text-align:center">
+        <div class="form-label">Next Set</div>
+        <div class="form-value" style="font-size:22px;font-family:'Syne',sans-serif;font-weight:800;color:var(--green)" id="hfw-next">1–15</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Current Position</div>
+    <div style="background:var(--surface2);border-radius:8px;padding:16px 18px;margin-bottom:20px;border-left:3px solid var(--accent)">
+      <div style="font-size:13px;color:var(--text);line-height:1.8" id="hfw-status">Not started — ready to begin Tier 1, Set 1 (words 1–15).</div>
+    </div>
+
+    <div class="sec-title">Sets Completed</div>
+    <div id="hfw-sets-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+      <div style="color:var(--muted);font-size:12px;padding:8px 0">No sets completed yet.</div>
+    </div>
+
+    <div class="sec-title">Update Progress</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Tier</div>
+          <select id="hfw-input-tier" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;">
+            <option value="1">Tier 1 (1–100)</option>
+            <option value="2">Tier 2 (101–300)</option>
+            <option value="3">Tier 3 (301–500)</option>
+          </select>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Last word number covered</div>
+          <input id="hfw-input-num" type="number" min="1" max="500" placeholder="e.g. 30"
+            style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;" />
+        </div>
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:6px">Last set label (e.g. "core verbs set 1")</div>
+        <input id="hfw-input-label" type="text" placeholder="e.g. conjunctions and pronouns"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;" />
+      </div>
+      <div>
+        <div class="form-label" style="margin-bottom:6px">Notes (optional)</div>
+        <input id="hfw-input-notes" type="text" placeholder="e.g. struggled with modal verbs"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;" />
+      </div>
+      <button onclick="saveHFWProgress()" style="background:var(--accent);border:none;border-radius:7px;padding:11px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:0.5px;">
+        Save Progress
+      </button>
+    </div>
+  </div>
+
+</div>
+
+  <!-- IDIOMS TAB -->
+  <div id="pane-idioms" style="display:none">
+    <div class="saved-header">
+      <div class="saved-title" data-i18n="idioms_title">Norwegian Idioms</div>
+      <button class="export-btn" onclick="exportIdioms()" data-i18n="idioms_export">↓ Export JSON</button>
+    </div>
+
+    <!-- DISCOVERY BUTTONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <button onclick="randomNorwegianIdiom()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:border-color 0.2s;text-align:left;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:20px;margin-bottom:6px">🎲</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text)">Random Norwegian Idiom</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5">Discover a random Norwegian expression</div>
+      </button>
+      <button onclick="showEnglishEquivalent()" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:border-color 0.2s;text-align:left;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:20px;margin-bottom:6px">🔄</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text)">English → Norwegian</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5">Find the Norwegian equivalent of an English idiom</div>
+      </button>
+    </div>
+
+    <!-- ENGLISH EQUIVALENT INPUT (hidden by default) -->
+    <div id="en-idiom-panel" style="display:none;background:var(--surface);border:1px solid var(--green);border-radius:10px;padding:20px;margin-bottom:20px">
+      <div class="sec-title" style="margin-top:0;color:var(--green)">English idiom → Norwegian equivalent</div>
+      <div style="display:flex;gap:10px">
+        <input id="en-idiom-q" class="search-input" placeholder="e.g. kill two birds with one stone..." autocomplete="off" style="flex:1;border-color:var(--green)" />
+        <button class="lookup-btn" id="en-idiom-btn" onclick="findNorwegianEquivalent()" style="background:var(--green)">Find</button>
+      </div>
+      <div id="en-idiom-err"></div>
+      <div id="en-idiom-loading"></div>
+      <div id="en-idiom-result"></div>
+    </div>
+
+    <!-- ADD IDIOM -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px">
+      <div class="sec-title" style="margin-top:0">Look up a specific idiom</div>
+      <div style="display:flex;gap:10px;margin-bottom:0">
+        <input id="idiom-q" class="search-input" placeholder="e.g. å ha en finger med i spillet..." autocomplete="off" style="flex:1" />
+        <button class="lookup-btn" id="idiom-btn" onclick="lookupIdiom()">Look up</button>
+      </div>
+      <div id="idiom-err"></div>
+      <div id="idiom-loading"></div>
+      <div id="idiom-result"></div>
+    </div>
+
+    <!-- SAVED IDIOMS -->
+    <div class="sec-title">Saved Idioms</div>
+    <div id="idioms-list"></div>
+  </div>
+
+  <!-- HELP TAB -->
+  <div id="pane-help" style="display:none">
+
+    <div class="help-card">
+      <div class="help-card-title">🇳🇴 What is NorskOrd?</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.8">NorskOrd is a Norwegian vocabulary builder powered by AI. Look up any word or phrase and get a full linguistic breakdown including translation, IPA pronunciation, all word forms, grammar notes and example sentences — in your own language.</div>
+    </div>
+
+    <div class="help-card">
+      <div class="help-card-title">💬 How to get this app</div>
+      <div class="help-step">
+        <div class="help-step-num">1</div>
+        <div class="help-step-text">Go to <strong>github.com/kspinghar/norskord</strong> and download the file <strong>norskord.html</strong></div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">2</div>
+        <div class="help-step-text">Open your AI chat — <strong>Claude (claude.ai)</strong> or <strong>ChatGPT (chatgpt.com)</strong></div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">3</div>
+        <div class="help-step-text">Click the <strong>paperclip / attachment icon</strong> in the chat input and upload <strong>norskord.html</strong></div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">4</div>
+        <div class="help-step-text">The app opens automatically. <strong>No setup, no account, no cost.</strong> Your word bank saves automatically each session.</div>
+      </div>
+    </div>
+
+    <div class="help-card">
+      <div class="help-card-title">⌕ Lookup tab</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.8">Type any Norwegian or English word or phrase. Toggle EN/NO to tell the app which language you're typing in. Hit Look up or press Enter. Save words you want to remember using the + Save button.</div>
+    </div>
+
+    <div class="help-card">
+      <div class="help-card-title">⊡ My Words tab</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.8">All your saved words in one place. Filter by verb, noun, adjective or phrase. Tap any word to see its full entry again. Use Export JSON to back up your word bank — copy the text and save it as a .json file.</div>
+    </div>
+
+    <div class="help-card">
+      <div class="help-card-title">◈ HFW Progress tab</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.8">Track your progress through the 500 most common Norwegian words. After each study session, log how far you've reached. Use Copy to chat to paste your progress into your AI chat so you can continue exactly where you left off.</div>
+    </div>
+
+    <div class="help-card">
+      <div class="help-card-title">❞ Idioms tab</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.8">Look up specific idioms, generate a random Norwegian idiom by theme, or type an English idiom to find its Norwegian equivalent. Save the ones you want to remember.</div>
+    </div>
+
+    <div class="help-card" style="border-color:var(--accent)">
+      <div class="help-card-title">🌍 Change language</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.8">Click the language button in the top right corner to change the language all entries are explained in. Supports English, Polish, Arabic, Somali, Tigrinya, Dari, Urdu, Spanish and French.</div>
+    </div>
+
+    <div style="text-align:center;padding:20px;font-size:11px;color:var(--muted);letter-spacing:1px">
+      NORSKORD · OPEN SOURCE · MADE FOR NORWEGIAN LEARNERS
+    </div>
+  </div>
+
+<!-- MODAL -->
+<div id="modal-bg" class="modal-bg" style="display:none" onclick="bgClose(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+let lang = 'en';
+let saved = [];
+let curEntry = null;
+let sessions = 0;
+let activeFilter = 'all';
+
+const STORAGE_KEY = 'norskord-v1';
+
+// ── PERSIST ──────────────────────────────────────────────────
+const HFW_KEY = 'norskord-hfw-v1';
+const IDIOMS_KEY = 'norskord-idioms-v1';
+let hfwData = { tier: 1, covered: 0, sets: [], notes: [] };
+let idioms = [];
+
+async function persist() {
+  const json = JSON.stringify(saved);
+  try { localStorage.setItem(STORAGE_KEY, json); } catch(e) {}
+  try { await window.storage.set(STORAGE_KEY, json); } catch(e) {}
+}
+
+async function persistHFW() {
+  const json = JSON.stringify(hfwData);
+  try { localStorage.setItem(HFW_KEY, json); } catch(e) {}
+  try { await window.storage.set(HFW_KEY, json); } catch(e) {}
+}
+
+async function persistIdioms() {
+  const json = JSON.stringify(idioms);
+  try { localStorage.setItem(IDIOMS_KEY, json); } catch(e) {}
+  try { await window.storage.set(IDIOMS_KEY, json); } catch(e) {}
+}
+
+async function hydrate() {
+  let data = null;
+  try {
+    const r = await window.storage.get(STORAGE_KEY);
+    if (r && r.value) { data = r.value; }
+  } catch(e) {}
+  if (!data) {
+    try { data = localStorage.getItem(STORAGE_KEY); } catch(e) {}
+  }
+  if (data) {
+    try { saved = JSON.parse(data); } catch(e) { saved = []; }
+  }
+
+  // Load HFW data
+  let hdata = null;
+  try {
+    const r2 = await window.storage.get(HFW_KEY);
+    if (r2 && r2.value) { hdata = r2.value; }
+  } catch(e) {}
+  if (!hdata) {
+    try { hdata = localStorage.getItem(HFW_KEY); } catch(e) {}
+  }
+  if (hdata) {
+    try { hfwData = JSON.parse(hdata); } catch(e) {}
+  }
+
+  // Load idioms
+  let idata = null;
+  try {
+    const r3 = await window.storage.get(IDIOMS_KEY);
+    if (r3 && r3.value) { idata = r3.value; }
+  } catch(e) {}
+  if (!idata) {
+    try { idata = localStorage.getItem(IDIOMS_KEY); } catch(e) {}
+  }
+  if (idata) {
+    try { idioms = JSON.parse(idata); } catch(e) {}
+  }
+
+  updateStats();
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-no').classList.toggle('active', l==='no');
+  document.getElementById('q').placeholder = l==='en'
+    ? 'e.g. to fetch / I would like to...'
+    : 'e.g. hente / jeg vil gjerne...';
+}
+
+function switchTab(t) {
+  ['lookup','saved','hfw','idioms','help'].forEach(id => {
+    const pane = document.getElementById('pane-'+id);
+    const btn  = document.getElementById('tab-btn-'+id);
+    if (pane) pane.style.display = t===id ? 'block' : 'none';
+    if (btn)  btn.classList.toggle('active', t===id);
+  });
+  if (t==='saved')  renderSaved();
+  if (t==='hfw')    renderHFW();
+  if (t==='idioms') renderIdioms();
+}
+
+function updateStats() {
+  document.getElementById('n-saved').textContent = saved.length;
+  document.getElementById('n-session').textContent = sessions;
+}
+
+// ── LOOKUP ────────────────────────────────────────────────────
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') doLookup(); });
+
+async function doLookup() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) return;
+
+  document.getElementById('err').innerHTML = '';
+  document.getElementById('result').innerHTML = '';
+  document.getElementById('loading').innerHTML = `
+    <div class="loading-state">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Looking up "${q}"…</div>
+    </div>`;
+  document.getElementById('go-btn').disabled = true;
+
+  const langName = getLangName();
+  const sys = `You are an expert Norwegian Bokmål linguist with deep knowledge of formal, informal, slang, and colloquial Norwegian. Return ONLY a raw JSON object — no markdown, no explanation, no code fences.
+
+CRITICAL: All translations, grammar notes, examples (English side) and cultural notes must be written in ${langName}. Only the Norwegian text itself stays in Norwegian.
+
+CRITICAL: Before matching to a dictionary word, first check if the input is slang, informal speech, a compound word, or colloquial Norwegian. Examples: "do" = toilet (slang), "dokø" = toilet queue (compound slang), "drittsekk" = insult, "liksom" = like/sort of. Always prioritise the actual meaning as used by native speakers over a formal dictionary match.
+
+Schema:
+{
+  "norwegian": "string — the word/phrase as commonly written",
+  "english": "string — full translation(s), including slang meaning if applicable",
+  "ipa": "string — IPA pronunciation of the Norwegian word/phrase",
+  "register": "formal|informal|slang|neutral",
+  "word_class": "verb|noun|adjective|adverb|phrase|conjunction|preposition|other",
+  "gender": "en|et|null",
+  "forms": [{"label":"string","value":"string"}],
+  "examples": [{"no":"string","en":"string"},{"no":"string","en":"string"}],
+  "grammar_note": "string — 1-2 sentences, practical for B1 learner. If slang, note the formal equivalent.",
+  "related": ["string","string","string"]
+}
+
+Verb forms: infinitive, present, simple past, past participle.
+Noun forms: indefinite sg, definite sg, indefinite pl, definite pl.
+Adjective forms: masculine/feminine, neuter, plural, comparative, superlative.
+Phrase/slang: forms can be [].
+Always 2 example sentences showing natural usage. Keep it Bokmål.
+Always provide accurate IPA for Norwegian Bokmål pronunciation.`;
+
+  const msg = lang==='en'
+    ? `English input: "${q}" — give me the Norwegian linguistic entry`
+    : `Norwegian input: "${q}" — give me the full linguistic entry`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: sys,
+        messages: [{ role:'user', content: msg }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    let entry;
+    try {
+      entry = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    } catch(e) {
+      throw new Error('Parse error — please try again.');
+    }
+
+    curEntry = entry;
+    sessions++;
+    updateStats();
+    document.getElementById('loading').innerHTML = '';
+    renderEntry(entry, 'result', false);
+
+  } catch(e) {
+    document.getElementById('loading').innerHTML = '';
+    document.getElementById('err').innerHTML = `<div class="error-box">⚠ ${e.message||'Something went wrong.'}</div>`;
+  }
+
+  document.getElementById('go-btn').disabled = false;
+}
+
+// ── RENDER ENTRY ──────────────────────────────────────────────
+function tagClass(wc) {
+  const map = { verb:'tag-verb', noun:'tag-noun', adjective:'tag-adjective', adverb:'tag-adverb', phrase:'tag-phrase' };
+  return map[wc] || 'tag-other';
+}
+
+// Normalise word for matching — strips å prefix, lowercases, trims
+// so "å spre", "spre", "Spre" all resolve to the same key "spre"
+function normalise(word) {
+  return word.trim().toLowerCase().replace(/^å\s+/, '');
+}
+
+function renderEntry(e, targetId, inModal) {
+  const isSaved = saved.some(w=>normalise(w.norwegian)===normalise(e.norwegian));
+
+  const formsHtml = (e.forms && e.forms.length)
+    ? `<div class="sec-title">Word Forms</div>
+       <div class="forms-grid">${e.forms.map(f=>`
+         <div class="form-item">
+           <div class="form-label">${f.label}</div>
+           <div class="form-value">${f.value}</div>
+         </div>`).join('')}
+       </div>`
+    : '';
+
+  const exHtml = (e.examples && e.examples.length)
+    ? `<div class="sec-title">Examples in Context</div>
+       ${e.examples.map(ex=>`
+         <div class="ex-box">
+           <div class="ex-no">🇳🇴 ${ex.no}</div>
+           <div class="ex-en">🇬🇧 ${ex.en}</div>
+         </div>`).join('')}`
+    : '';
+
+  const gramHtml = e.grammar_note
+    ? `<div class="sec-title">Grammar Note</div>
+       <div class="gram-note">${e.grammar_note}</div>`
+    : '';
+
+  const relHtml = (e.related && e.related.length)
+    ? `<div class="sec-title">Related Words</div>
+       <div class="related-list">${e.related.map(r=>`
+         <span class="rel-chip" onclick="quickLookup('${r}')">${r}</span>`).join('')}
+       </div>`
+    : '';
+
+  const genderTag = e.gender ? `<span class="tag tag-en">${e.gender}</span>` : '';
+  const regColors = { formal:'tag-adverb', informal:'tag-adj', slang:'tag-phrase', neutral:'tag-other' };
+  const registerTag = e.register && e.register !== 'neutral'
+    ? `<span class="tag ${regColors[e.register]||'tag-other'}">${e.register}</span>`
+    : '';
+
+  const saveHtml = !inModal
+    ? `<button class="save-btn${isSaved?' saved':''}" id="save-main-btn" onclick="toggleSave()">
+         ${isSaved ? '✓ Saved' : '+ Save'}
+       </button>`
+    : '';
+
+  const ipaHtml = e.ipa
+    ? `<div style="font-size:13px;color:var(--muted2);margin-top:6px;letter-spacing:0.5px;">/${e.ipa}/</div>`
+    : '';
+
+  document.getElementById(targetId).innerHTML = `
+    <div class="entry-card">
+      <div class="entry-top">
+        <div>
+          <div class="entry-word">${e.norwegian}</div>
+          ${ipaHtml}
+          <div class="entry-meta" style="margin-top:8px">
+            <span class="tag ${tagClass(e.word_class)}">${e.word_class}</span>
+            ${genderTag}
+            ${registerTag}
+          </div>
+        </div>
+        ${saveHtml}
+      </div>
+      <div class="sec-title">Translation</div>
+      <div class="trans-box">${e.english}</div>
+      ${formsHtml}
+      ${exHtml}
+      ${gramHtml}
+      ${relHtml}
+    </div>`;
+}
+
+function quickLookup(word) {
+  document.getElementById('q').value = word;
+  setLang('no');
+  switchTab('lookup');
+  doLookup();
+}
+
+// ── SAVE ──────────────────────────────────────────────────────
+function toggleSave() {
+  if (!curEntry) return;
+  const idx = saved.findIndex(w=>normalise(w.norwegian)===normalise(curEntry.norwegian));
+  if (idx >= 0) {
+    saved.splice(idx,1);
+    document.getElementById('save-main-btn').textContent = '+ Save';
+    document.getElementById('save-main-btn').classList.remove('saved');
+  } else {
+    saved.push({ ...curEntry, savedAt: new Date().toISOString() });
+    document.getElementById('save-main-btn').textContent = '✓ Saved';
+    document.getElementById('save-main-btn').classList.add('saved');
+  }
+  updateStats();
+  persist();
+}
+
+// ── SAVED TAB ─────────────────────────────────────────────────
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.f-chip').forEach(c=>c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderSaved();
+}
+
+function renderSaved() {
+  const list = document.getElementById('saved-list');
+  const items = activeFilter==='all' ? saved : saved.filter(w=>w.word_class===activeFilter);
+
+  if (items.length===0) {
+    list.innerHTML = `<div class="empty-state">${
+      saved.length===0
+        ? '⬡<br><br>' + (uiStrings.words_empty || 'No words saved yet.<br>Look up a word and tap Save.').replace('\n','<br>')
+        : (uiStrings.filter_no_results || 'No words in this category.')
+    }</div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(w => {
+    const globalIdx = saved.indexOf(w);
+    return `<div class="saved-item" onclick="openModal(${globalIdx})">
+      <div class="si-left">
+        <div class="si-word">${w.norwegian}</div>
+        <div class="si-trans">${w.english}</div>
+      </div>
+      <div class="si-right">
+        <span class="tag ${tagClass(w.word_class)}" style="font-size:9px">${w.word_class}</span>
+        <button class="del-btn" onclick="delWord(event,${globalIdx})">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function delWord(e, idx) {
+  e.stopPropagation();
+  saved.splice(idx,1);
+  updateStats();
+  persist();
+  renderSaved();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function openModal(idx) {
+  const e = saved[idx];
+  const body = document.getElementById('modal-body');
+  body.innerHTML = '';
+  renderEntry(e, 'modal-body', true);
+  document.getElementById('modal-bg').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('modal-bg').style.display='none'; }
+function bgClose(e) { if(e.target.id==='modal-bg') closeModal(); }
+
+// ── EXPORT ────────────────────────────────────────────────────
+function doExport() {
+  if (!saved.length) { alert('Nothing saved yet.'); return; }
+  const json = JSON.stringify(saved, null, 2);
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px">Export Word Bank</div>
+      <div style="font-size:12px;color:var(--muted2);line-height:1.7">
+        Copy the JSON below → paste into a new file → save as <code style="color:var(--accent);background:var(--surface2);padding:2px 6px;border-radius:3px">norskord.json</code> in your iCloud Drive.
+      </div>
+    </div>
+    <button onclick="copyJSON()" id="copy-btn" style="background:var(--accent);border:none;border-radius:7px;padding:10px 20px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;margin-bottom:14px;letter-spacing:0.5px;display:block;">
+      ⎘ Copy to clipboard
+    </button>
+    <textarea id="json-out" readonly onclick="this.select()" style="width:100%;height:300px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;resize:vertical;outline:none;">${json}</textarea>`;
+
+  document.getElementById('modal-bg').style.display = 'flex';
+}
+
+function copyJSON() {
+  const ta = document.getElementById('json-out');
+  ta.select();
+  const btn = document.getElementById('copy-btn');
+  try {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.style.background = 'var(--green)';
+      setTimeout(() => { btn.textContent = '⎘ Copy to clipboard'; btn.style.background = 'var(--accent)'; }, 2000);
+    }).catch(() => {
+      document.execCommand('copy');
+      btn.textContent = '✓ Copied!';
+      btn.style.background = 'var(--green)';
+      setTimeout(() => { btn.textContent = '⎘ Copy to clipboard'; btn.style.background = 'var(--accent)'; }, 2000);
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '⎘ Copy to clipboard'; }, 2000);
+  }
+}
+
+// ── HFW PROGRESS ──────────────────────────────────────────────
+function renderHFW() {
+  document.getElementById('hfw-tier').textContent = hfwData.tier;
+  document.getElementById('hfw-covered').textContent = hfwData.covered;
+
+  const nextStart = hfwData.covered + 1;
+  const nextEnd = hfwData.covered + 15;
+  document.getElementById('hfw-next').textContent = hfwData.covered >= 500 ? 'Complete!' : `${nextStart}–${nextEnd}`;
+
+  const tierLabels = { 1:'Tier 1 (top 100)', 2:'Tier 2 (101–300)', 3:'Tier 3 (301–500)' };
+  const lastSet = hfwData.sets.length ? hfwData.sets[hfwData.sets.length-1] : null;
+  const statusEl = document.getElementById('hfw-status');
+  if (!lastSet) {
+    statusEl.textContent = 'Not started — ready to begin Tier 1, Set 1 (words 1–15).';
+  } else {
+    statusEl.innerHTML = `<strong>${tierLabels[hfwData.tier]}</strong> · ${hfwData.covered} words covered<br>Last completed: <span style="color:var(--accent)">${lastSet.label}</span>${lastSet.notes ? `<br>Notes: <span style="color:var(--muted2)">${lastSet.notes}</span>` : ''}`;
+  }
+
+  const setsEl = document.getElementById('hfw-sets-list');
+  if (!hfwData.sets.length) {
+    setsEl.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0">No sets completed yet.</div>';
+  } else {
+    setsEl.innerHTML = hfwData.sets.map((s,i) => `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:11px;color:var(--muted2)">
+        <span style="color:var(--accent);font-weight:500">${i+1}.</span> ${s.label} <span style="color:var(--muted)">(1–${s.upTo})</span>
+      </div>`).join('');
+  }
+}
+
+function saveHFWProgress() {
+  const tier = parseInt(document.getElementById('hfw-input-tier').value);
+  const num  = parseInt(document.getElementById('hfw-input-num').value);
+  const label = document.getElementById('hfw-input-label').value.trim();
+  const notes = document.getElementById('hfw-input-notes').value.trim();
+
+  if (!num || !label) { alert('Please fill in the word number and set label.'); return; }
+
+  hfwData.tier = tier;
+  hfwData.covered = num;
+  hfwData.sets.push({ label, upTo: num, tier, notes, date: new Date().toISOString().split('T')[0] });
+
+  persistHFW();
+  renderHFW();
+
+  document.getElementById('hfw-input-num').value = '';
+  document.getElementById('hfw-input-label').value = '';
+  document.getElementById('hfw-input-notes').value = '';
+}
+
+function copyHFW() {
+  const tierLabels = { 1:'Tier 1 (top 100)', 2:'Tier 2 (101–300)', 3:'Tier 3 (301–500)' };
+  const lastSet = hfwData.sets.length ? hfwData.sets[hfwData.sets.length-1] : null;
+  const nextStart = hfwData.covered + 1;
+  const nextEnd = hfwData.covered + 15;
+
+  const block = `── HFW PROGRESS ──────────────────────
+Tier: ${tierLabels[hfwData.tier]}
+Words covered: ${hfwData.covered}
+Last set: ${lastSet ? lastSet.label : 'none'}
+Next: words ${nextStart}–${nextEnd}
+Sets done: ${hfwData.sets.length}
+──────────────────────────────────────`;
+
+  const modal = document.getElementById('modal-body');
+  modal.innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px">Copy to Chat</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:12px;line-height:1.6">Paste this into the chat when resuming your HFW session.</div>
+    <button onclick="copyHFWText()" id="hfw-copy-btn" style="background:var(--accent);border:none;border-radius:7px;padding:9px 20px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;margin-bottom:12px;display:block;">⎘ Copy</button>
+    <textarea id="hfw-copy-text" readonly onclick="this.select()" style="width:100%;height:160px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;color:var(--muted2);font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;resize:none;outline:none;">${block}</textarea>`;
+  document.getElementById('modal-bg').style.display = 'flex';
+}
+
+function copyHFWText() {
+  const ta = document.getElementById('hfw-copy-text');
+  ta.select();
+  const btn = document.getElementById('hfw-copy-btn');
+  try {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      btn.textContent = '✓ Copied!'; btn.style.background = 'var(--green)';
+      setTimeout(() => { btn.textContent = '⎘ Copy'; btn.style.background = 'var(--accent)'; }, 2000);
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '⎘ Copy'; }, 2000);
+  }
+}
+
+// ── IDIOMS ────────────────────────────────────────────────────
+document.getElementById('idiom-q').addEventListener('keydown', e => { if(e.key==='Enter') lookupIdiom(); });
+
+async function lookupIdiom() {
+  const q = document.getElementById('idiom-q').value.trim();
+  if (!q) return;
+
+  document.getElementById('idiom-err').innerHTML = '';
+  document.getElementById('idiom-result').innerHTML = '';
+  document.getElementById('idiom-loading').innerHTML = `
+    <div class="loading-state" style="padding:32px">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Looking up idiom…</div>
+    </div>`;
+  document.getElementById('idiom-btn').disabled = true;
+
+  const langName = getLangName();
+  const sys = `You are an expert Norwegian Bokmål linguist specialising in idiomatic language. Return ONLY a raw JSON object — no markdown, no explanation, no code fences. All translations, meanings and cultural notes must be written in ${langName}.
+
+Schema:
+{
+  "idiom": "string — the idiom in Norwegian",
+  "literal": "string — word-for-word literal translation into ${langName}",
+  "meaning": "string — actual meaning in ${langName}",
+  "ipa": "string — IPA pronunciation",
+  "example": {"no": "string — example sentence in Norwegian", "en": "string — English translation"},
+  "cultural_note": "string — cultural context or origin, 1-3 sentences",
+  "register": "formal|informal|slang|neutral",
+  "related": ["similar idiom 1", "similar idiom 2"]
+}
+
+Always provide an accurate IPA transcription for Norwegian Bokmål.
+If the input is English, find the closest Norwegian idiomatic equivalent.`;
+
+  const msg = `Look up this Norwegian idiom or expression: "${q}"`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: sys,
+        messages: [{ role:'user', content: msg }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    let entry;
+    try { entry = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { throw new Error('Parse error — please try again.'); }
+
+    document.getElementById('idiom-loading').innerHTML = '';
+    renderIdiomEntry(entry, 'idiom-result', false);
+
+  } catch(e) {
+    document.getElementById('idiom-loading').innerHTML = '';
+    document.getElementById('idiom-err').innerHTML = `<div class="error-box">⚠ ${e.message||'Something went wrong.'}</div>`;
+  }
+
+  document.getElementById('idiom-btn').disabled = false;
+}
+
+function renderIdiomEntry(e, targetId, inModal) {
+  const alreadySaved = idioms.some(i => i.idiom === e.idiom);
+  const regColors = { formal:'tag-adverb', informal:'tag-adj', slang:'tag-phrase', neutral:'tag-other' };
+  const registerTag = e.register && e.register !== 'neutral'
+    ? `<span class="tag ${regColors[e.register]||'tag-other'}">${e.register}</span>` : '';
+
+  const saveHtml = !inModal
+    ? `<button class="save-btn${alreadySaved?' saved':''}" id="idiom-save-btn" onclick="toggleSaveIdiom(${JSON.stringify(e).split('"').join('&quot;')})">
+         ${alreadySaved ? '✓ Saved' : '+ Save'}
+       </button>` : '';
+
+  const relHtml = (e.related && e.related.length)
+    ? `<div class="sec-title">Related Expressions</div>
+       <div class="related-list">${e.related.map(r=>`
+         <span class="rel-chip" onclick="quickIdiomLookup('${r}')">${r}</span>`).join('')}
+       </div>` : '';
+
+  document.getElementById(targetId).innerHTML = `
+    <div class="entry-card" style="margin-top:16px">
+      <div class="entry-top">
+        <div style="flex:1">
+          <div class="entry-word" style="font-size:24px;letter-spacing:-0.5px">${e.idiom}</div>
+          <div style="font-size:13px;color:var(--muted2);margin-top:6px;letter-spacing:0.5px">/${e.ipa}/</div>
+          <div class="entry-meta" style="margin-top:8px">
+            <span class="tag tag-phrase">idiom</span>
+            ${registerTag}
+          </div>
+        </div>
+        ${saveHtml}
+      </div>
+
+      <div class="sec-title">Literal Translation</div>
+      <div class="trans-box" style="border-color:var(--yellow);font-style:italic;color:var(--muted2)">${e.literal}</div>
+
+      <div class="sec-title">Actual Meaning</div>
+      <div class="trans-box">${e.meaning}</div>
+
+      <div class="sec-title">Example in Context</div>
+      <div class="ex-box">
+        <div class="ex-no">🇳🇴 ${e.example.no}</div>
+        <div class="ex-en">🇬🇧 ${e.example.en}</div>
+      </div>
+
+      ${e.cultural_note ? `
+        <div class="sec-title">Cultural Note</div>
+        <div class="gram-note">${e.cultural_note}</div>` : ''}
+
+      ${relHtml}
+    </div>`;
+}
+
+function quickIdiomLookup(idiom) {
+  document.getElementById('idiom-q').value = idiom;
+  lookupIdiom();
+}
+
+function toggleSaveIdiom(entry) {
+  const idx = idioms.findIndex(i => i.idiom === entry.idiom);
+  const btn = document.getElementById('idiom-save-btn');
+  if (idx >= 0) {
+    idioms.splice(idx, 1);
+    if (btn) { btn.textContent = '+ Save'; btn.classList.remove('saved'); }
+  } else {
+    idioms.push({ ...entry, savedAt: new Date().toISOString() });
+    if (btn) { btn.textContent = '✓ Saved'; btn.classList.add('saved'); }
+  }
+  persistIdioms();
+}
+
+function renderIdioms() {
+  const list = document.getElementById('idioms-list');
+  if (!idioms.length) {
+    list.innerHTML = `<div class="empty-state">⬡<br><br>${(uiStrings.idioms_empty || 'No idioms saved yet.<br>Look up an idiom and tap Save.').replace('\n','<br>')}</div>`;
+    return;
+  }
+  list.innerHTML = idioms.map((e, idx) => `
+    <div class="saved-item" onclick="openIdiomModal(${idx})">
+      <div class="si-left">
+        <div class="si-word" style="font-size:14px">${e.idiom}</div>
+        <div class="si-trans">${e.meaning}</div>
+      </div>
+      <div class="si-right">
+        <span class="tag tag-phrase" style="font-size:9px">idiom</span>
+        <button class="del-btn" onclick="delIdiom(event,${idx})">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function delIdiom(e, idx) {
+  e.stopPropagation();
+  idioms.splice(idx, 1);
+  persistIdioms();
+  renderIdioms();
+}
+
+function openIdiomModal(idx) {
+  const entry = idioms[idx];
+  document.getElementById('modal-body').innerHTML = '';
+  renderIdiomEntry(entry, 'modal-body', true);
+  document.getElementById('modal-bg').style.display = 'flex';
+}
+
+function exportIdioms() {
+  if (!idioms.length) { alert('No idioms saved yet.'); return; }
+  const json = JSON.stringify(idioms, null, 2);
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px">Export Idioms</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:12px;line-height:1.6">Copy and save as <code style="color:var(--accent);background:var(--surface2);padding:2px 6px;border-radius:3px">norskord-idioms.json</code></div>
+    <button onclick="copyIdiomJSON()" id="idiom-export-btn" style="background:var(--accent);border:none;border-radius:7px;padding:9px 20px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;margin-bottom:12px;display:block;">⎘ Copy</button>
+    <textarea readonly onclick="this.select()" style="width:100%;height:280px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;resize:none;outline:none;">${json}</textarea>`;
+  document.getElementById('modal-bg').style.display = 'flex';
+}
+
+function copyIdiomJSON() {
+  const ta = document.querySelector('#modal-body textarea');
+  ta.select();
+  const btn = document.getElementById('idiom-export-btn');
+  try {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      btn.textContent = '✓ Copied!'; btn.style.background = 'var(--green)';
+      setTimeout(() => { btn.textContent = '⎘ Copy'; btn.style.background = 'var(--accent)'; }, 2000);
+    });
+  } catch(e) { document.execCommand('copy'); btn.textContent = '✓ Copied!'; }
+}
+
+// ── RANDOM & EQUIVALENT IDIOMS ───────────────────────────────
+const NORWEGIAN_IDIOM_CATEGORIES = [
+  'nature and weather', 'food and drink', 'body parts', 'animals',
+  'work and money', 'emotions and feelings', 'time', 'travel and movement',
+  'social situations', 'luck and fate', 'intelligence and foolishness', 'relationships'
+];
+
+async function randomNorwegianIdiom() {
+  const category = NORWEGIAN_IDIOM_CATEGORIES[Math.floor(Math.random() * NORWEGIAN_IDIOM_CATEGORIES.length)];
+  const alreadySeen = idioms.map(i => i.idiom);
+
+  document.getElementById('idiom-loading').innerHTML = `
+    <div class="loading-state" style="padding:32px">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Finding a random idiom about ${category}…</div>
+    </div>`;
+  document.getElementById('idiom-result').innerHTML = '';
+  document.getElementById('idiom-err').innerHTML = '';
+
+  const sys = `You are an expert Norwegian Bokmål linguist. Return ONLY a raw JSON object — no markdown, no code fences.
+
+Schema:
+{
+  "idiom": "string",
+  "literal": "string — word-for-word English translation",
+  "meaning": "string — actual meaning in English",
+  "ipa": "string — IPA for Norwegian Bokmål",
+  "example": {"no": "string", "en": "string"},
+  "cultural_note": "string — 1-3 sentences on origin or cultural context",
+  "register": "formal|informal|slang|neutral",
+  "related": ["string", "string"]
+}`;
+
+  const alreadyStr = alreadySeen.length ? `Do NOT return any of these already-seen idioms: ${alreadySeen.slice(-20).join(', ')}.` : '';
+  const msg = `Give me one authentic, commonly used Norwegian idiom related to the theme of "${category}". ${alreadyStr} Make it genuinely interesting and culturally revealing.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: sys,
+        messages: [{ role:'user', content: msg }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    let entry;
+    try { entry = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { throw new Error('Parse error — try again.'); }
+
+    document.getElementById('idiom-loading').innerHTML = '';
+    renderIdiomEntry(entry, 'idiom-result', false);
+
+    // Scroll to result
+    document.getElementById('idiom-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  } catch(e) {
+    document.getElementById('idiom-loading').innerHTML = '';
+    document.getElementById('idiom-err').innerHTML = `<div class="error-box">⚠ ${e.message||'Something went wrong.'}</div>`;
+  }
+}
+
+function showEnglishEquivalent() {
+  const panel = document.getElementById('en-idiom-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') {
+    document.getElementById('en-idiom-q').focus();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const enQ = document.getElementById('en-idiom-q');
+  if (enQ) enQ.addEventListener('keydown', e => { if(e.key==='Enter') findNorwegianEquivalent(); });
+});
+
+async function findNorwegianEquivalent() {
+  const q = document.getElementById('en-idiom-q').value.trim();
+  if (!q) return;
+
+  document.getElementById('en-idiom-err').innerHTML = '';
+  document.getElementById('en-idiom-result').innerHTML = '';
+  document.getElementById('en-idiom-loading').innerHTML = `
+    <div class="loading-state" style="padding:32px">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Finding Norwegian equivalent…</div>
+    </div>`;
+  document.getElementById('en-idiom-btn').disabled = true;
+
+  const sys = `You are an expert Norwegian Bokmål linguist specialising in idiomatic language. Return ONLY a raw JSON object — no markdown, no code fences.
+
+The user gives you an English idiom. Find the closest Norwegian equivalent — NOT a word-for-word translation, but the idiom Norwegians actually use to express the same idea.
+
+Schema:
+{
+  "idiom": "string — the Norwegian equivalent idiom",
+  "literal": "string — word-for-word English translation of the NORWEGIAN idiom",
+  "meaning": "string — shared meaning of both idioms in English",
+  "ipa": "string — IPA for the Norwegian idiom",
+  "english_original": "string — the original English idiom",
+  "example": {"no": "string", "en": "string"},
+  "cultural_note": "string — note on similarities or differences in how the two cultures express this idea",
+  "register": "formal|informal|slang|neutral",
+  "related": ["string", "string"]
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: sys,
+        messages: [{ role:'user', content: `English idiom: "${q}" — find the Norwegian equivalent` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    let entry;
+    try { entry = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { throw new Error('Parse error — try again.'); }
+
+    document.getElementById('en-idiom-loading').innerHTML = '';
+
+    // Show english original above the result
+    const englishBadge = entry.english_original
+      ? `<div style="background:rgba(62,207,142,.08);border:1px solid rgba(62,207,142,.2);border-radius:8px;padding:10px 14px;margin-top:16px;font-size:12px;color:var(--green);">
+           🇬🇧 English: <em>"${entry.english_original}"</em> → 🇳🇴 Norwegian equivalent below
+         </div>` : '';
+
+    document.getElementById('en-idiom-result').innerHTML = englishBadge;
+    renderIdiomEntry(entry, 'en-idiom-result', false);
+
+  } catch(e) {
+    document.getElementById('en-idiom-loading').innerHTML = '';
+    document.getElementById('en-idiom-err').innerHTML = `<div class="error-box">⚠ ${e.message||'Something went wrong.'}</div>`;
+  }
+
+  document.getElementById('en-idiom-btn').disabled = false;
+}
+
+// ── TRANSLATION ENGINE ───────────────────────────────────────
+const UI_STRINGS_KEY = 'norskord-ui-strings-v1';
+const UI_STRINGS_LANG_KEY = 'norskord-ui-lang-v1';
+
+// Default English strings — always available as fallback
+const DEFAULT_STRINGS = {
+  tab_lookup: 'Lookup',
+  tab_words: 'My Words',
+  tab_hfw: 'HFW',
+  tab_idioms: 'Idioms',
+  tab_help: 'Help',
+  stat_saved: 'Saved',
+  stat_session: 'Session',
+  lookup_label: 'Enter a word or phrase',
+  lookup_btn: 'Look up',
+  lookup_placeholder: 'e.g. to fetch / hente / jeg vil gjerne...',
+  words_title: 'My Word Bank',
+  words_export: '↓ Export JSON',
+  words_empty: 'No words saved yet.\nLook up a word and tap Save.',
+  filter_all: 'All',
+  filter_verbs: 'Verbs',
+  filter_nouns: 'Nouns',
+  filter_adj: 'Adjectives',
+  filter_phrases: 'Phrases',
+  hfw_title: 'High Frequency Words',
+  hfw_copy: '⎘ Copy to chat',
+  idioms_title: 'Norwegian Idioms',
+  idioms_export: '↓ Export JSON',
+  idioms_empty: 'No idioms saved yet.\nLook up an idiom and tap Save.',
+  idioms_lookup_label: 'Look up a specific idiom',
+  idioms_lookup_placeholder: 'e.g. å ha en finger med i spillet...',
+  idioms_random_title: 'Random Norwegian Idiom',
+  idioms_random_body: 'Discover a random Norwegian expression',
+  idioms_equiv_title: 'English → Norwegian',
+  idioms_equiv_body: 'Find the Norwegian equivalent of an English idiom',
+  logo_sub: 'Vocabulary Builder · B1 Track',
+  save_btn: '+ Save',
+  saved_btn: '✓ Saved',
+  onboard_lang_title: 'Choose your language',
+  onboard_lang_body: 'NorskOrd will explain Norwegian words and grammar in your native language.',
+  onboard_welcome_title: 'Welcome to NorskOrd',
+  onboard_welcome_body: 'Your personal Norwegian vocabulary builder. Look up any word or phrase and get a full linguistic breakdown — translation, pronunciation, word forms, grammar notes and examples.',
+  onboard_words_title: 'Build your word bank',
+  onboard_words_body: 'Save the words you want to remember. Filter by verbs, nouns, adjectives and phrases. Tap any saved word to see its full entry again. Export your word bank anytime as a JSON backup.',
+  onboard_hfw_title: 'High Frequency Words',
+  onboard_hfw_body: 'Track your progress through the 500 most common Norwegian words across three tiers. The top 500 words cover 85% of everyday Norwegian speech.',
+  onboard_idioms_title: 'Discover idioms',
+  onboard_idioms_body: 'Look up Norwegian idioms, generate random ones by theme, or find the Norwegian equivalent of an English idiom. Idioms reveal how Norwegians actually think.',
+  onboard_ready_title: "You're ready",
+  onboard_ready_body: 'NorskOrd works inside Claude or ChatGPT — just upload this HTML file to your chat. Your word bank, idioms and progress are saved automatically. Visit the Help tab anytime for a reminder.',
+  onboard_back: 'Back',
+  onboard_next: 'Get started →',
+  onboard_finish: 'Start learning →',
+  help_what_title: '🇳🇴 What is NorskOrd?',
+  help_get_title: '💬 How to get this app',
+  help_lookup_title: '⌕ Lookup tab',
+  help_words_title: '⊡ My Words tab',
+  help_hfw_title: '◈ HFW Progress tab',
+  help_idioms_title: '❞ Idioms tab',
+  help_lang_title: '🌍 Change language',
+  search_lang_placeholder: 'Search language...',
+  export_copy_btn: '⎘ Copy to clipboard',
+  export_title: 'Export Word Bank',
+  export_body: 'Copy the JSON below → paste into a new file → save as norskord.json in your cloud storage.',
+};
+
+let uiStrings = { ...DEFAULT_STRINGS };
+let uiStringsLang = 'en';
+
+async function loadUIStrings(langCode) {
+  if (langCode === 'en') {
+    uiStrings = { ...DEFAULT_STRINGS };
+    applyUIStrings();
+    return;
+  }
+
+  // Check cache first
+  try {
+    const cachedLang = localStorage.getItem(UI_STRINGS_LANG_KEY);
+    const cached = localStorage.getItem(UI_STRINGS_KEY);
+    if (cachedLang === langCode && cached) {
+      uiStrings = { ...DEFAULT_STRINGS, ...JSON.parse(cached) };
+      applyUIStrings();
+      return;
+    }
+  } catch(e) {}
+
+  // Also try window.storage cache
+  try {
+    const r1 = await window.storage.get(UI_STRINGS_LANG_KEY);
+    const r2 = await window.storage.get(UI_STRINGS_KEY);
+    if (r1?.value === langCode && r2?.value) {
+      uiStrings = { ...DEFAULT_STRINGS, ...JSON.parse(r2.value) };
+      applyUIStrings();
+      return;
+    }
+  } catch(e) {}
+
+  // Show loading indicator on logo-sub
+  const logoSub = document.getElementById('logo-sub-lang');
+  if (logoSub) logoSub.textContent = '...translating interface...';
+
+  // Generate translations via API
+  const langName = getLangName();
+  const keys = Object.keys(DEFAULT_STRINGS);
+  const values = Object.values(DEFAULT_STRINGS);
+
+  const prompt = `Translate the following UI strings for a Norwegian vocabulary learning app into ${langName}.
+The app is called NorskOrd (do not translate this name).
+Return ONLY a raw JSON object mapping the exact same keys to translated values. No markdown, no explanation.
+Keep emoji, symbols (↓ ⎘ ⌕ ⊡ ◈ ❞ ✓ →), and technical terms (JSON, HFW, HTML, Claude, ChatGPT) unchanged.
+Keep placeholders like 'e.g.' and Norwegian example words unchanged.
+
+Keys and current English values:
+${JSON.stringify(Object.fromEntries(keys.map((k,i)=>[k,values[i]])), null, 2)}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role:'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    const translated = JSON.parse(raw.replace(/```json|```/g,'').trim());
+
+    uiStrings = { ...DEFAULT_STRINGS, ...translated };
+    uiStringsLang = langCode;
+
+    // Cache it
+    try {
+      localStorage.setItem(UI_STRINGS_KEY, JSON.stringify(translated));
+      localStorage.setItem(UI_STRINGS_LANG_KEY, langCode);
+      window.storage.set(UI_STRINGS_KEY, JSON.stringify(translated));
+      window.storage.set(UI_STRINGS_LANG_KEY, langCode);
+    } catch(e) {}
+
+  } catch(e) {
+    console.warn('UI translation failed, using English fallback', e);
+    uiStrings = { ...DEFAULT_STRINGS };
+  }
+
+  applyUIStrings();
+}
+
+function applyUIStrings() {
+  // Apply to all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (uiStrings[key]) el.textContent = uiStrings[key];
+  });
+
+  // Apply to placeholder
+  const qInput = document.getElementById('q');
+  if (qInput) qInput.placeholder = uiStrings.lookup_placeholder || DEFAULT_STRINGS.lookup_placeholder;
+
+  // Apply logo sub
+  const logoSub = document.getElementById('logo-sub-lang');
+  if (logoSub) logoSub.textContent = uiStrings.logo_sub || DEFAULT_STRINGS.logo_sub;
+
+  // Apply idiom placeholder
+  const idiomQ = document.getElementById('idiom-q');
+  if (idiomQ) idiomQ.placeholder = uiStrings.idioms_lookup_placeholder || DEFAULT_STRINGS.idioms_lookup_placeholder;
+
+  // Re-render open panes so dynamic content updates too
+  renderSaved();
+  renderIdioms();
+}
+
+// Override saveLang to also load UI strings
+const _origSaveLang = saveLang;
+
+// ── LANGUAGE SUPPORT ─────────────────────────────────────────
+const LANG_KEY = 'norskord-lang-v1';
+const ONBOARD_KEY = 'norskord-onboarded-v1';
+
+const LANGUAGES = [
+  { code:'af', name:'Afrikaans', flag:'🇿🇦' },
+  { code:'sq', name:'Shqip (Albanian)', flag:'🇦🇱' },
+  { code:'am', name:'አማርኛ (Amharic)', flag:'🇪🇹' },
+  { code:'ar', name:'العربية (Arabic)', flag:'🇸🇦' },
+  { code:'hy', name:'Հայերեն (Armenian)', flag:'🇦🇲' },
+  { code:'az', name:'Azərbaycan (Azerbaijani)', flag:'🇦🇿' },
+  { code:'eu', name:'Euskara (Basque)', flag:'🏴' },
+  { code:'be', name:'Беларуская (Belarusian)', flag:'🇧🇾' },
+  { code:'bn', name:'বাংলা (Bengali)', flag:'🇧🇩' },
+  { code:'bs', name:'Bosanski (Bosnian)', flag:'🇧🇦' },
+  { code:'bg', name:'Български (Bulgarian)', flag:'🇧🇬' },
+  { code:'ca', name:'Català (Catalan)', flag:'🏴' },
+  { code:'zh', name:'中文 (Chinese)', flag:'🇨🇳' },
+  { code:'hr', name:'Hrvatski (Croatian)', flag:'🇭🇷' },
+  { code:'cs', name:'Čeština (Czech)', flag:'🇨🇿' },
+  { code:'da', name:'Dansk (Danish)', flag:'🇩🇰' },
+  { code:'nl', name:'Nederlands (Dutch)', flag:'🇳🇱' },
+  { code:'en', name:'English', flag:'🇬🇧' },
+  { code:'et', name:'Eesti (Estonian)', flag:'🇪🇪' },
+  { code:'fi', name:'Suomi (Finnish)', flag:'🇫🇮' },
+  { code:'fr', name:'Français (French)', flag:'🇫🇷' },
+  { code:'gl', name:'Galego (Galician)', flag:'🏴' },
+  { code:'ka', name:'ქართული (Georgian)', flag:'🇬🇪' },
+  { code:'de', name:'Deutsch (German)', flag:'🇩🇪' },
+  { code:'el', name:'Ελληνικά (Greek)', flag:'🇬🇷' },
+  { code:'gu', name:'ગુજરાતી (Gujarati)', flag:'🇮🇳' },
+  { code:'ht', name:'Kreyòl Ayisyen (Haitian Creole)', flag:'🇭🇹' },
+  { code:'ha', name:'Hausa', flag:'🇳🇬' },
+  { code:'he', name:'עברית (Hebrew)', flag:'🇮🇱' },
+  { code:'hi', name:'हिन्दी (Hindi)', flag:'🇮🇳' },
+  { code:'hu', name:'Magyar (Hungarian)', flag:'🇭🇺' },
+  { code:'is', name:'Íslenska (Icelandic)', flag:'🇮🇸' },
+  { code:'ig', name:'Igbo', flag:'🇳🇬' },
+  { code:'id', name:'Bahasa Indonesia (Indonesian)', flag:'🇮🇩' },
+  { code:'ga', name:'Gaeilge (Irish)', flag:'🇮🇪' },
+  { code:'it', name:'Italiano (Italian)', flag:'🇮🇹' },
+  { code:'ja', name:'日本語 (Japanese)', flag:'🇯🇵' },
+  { code:'jv', name:'Basa Jawa (Javanese)', flag:'🇮🇩' },
+  { code:'kn', name:'ಕನ್ನಡ (Kannada)', flag:'🇮🇳' },
+  { code:'kk', name:'Қазақша (Kazakh)', flag:'🇰🇿' },
+  { code:'km', name:'ខ្មែរ (Khmer)', flag:'🇰🇭' },
+  { code:'ko', name:'한국어 (Korean)', flag:'🇰🇷' },
+  { code:'ku', name:'Kurdî (Kurdish)', flag:'🏴' },
+  { code:'ky', name:'Кыргызча (Kyrgyz)', flag:'🇰🇬' },
+  { code:'lo', name:'ລາວ (Lao)', flag:'🇱🇦' },
+  { code:'lv', name:'Latviešu (Latvian)', flag:'🇱🇻' },
+  { code:'lt', name:'Lietuvių (Lithuanian)', flag:'🇱🇹' },
+  { code:'lb', name:'Lëtzebuergesch (Luxembourgish)', flag:'🇱🇺' },
+  { code:'mk', name:'Македонски (Macedonian)', flag:'🇲🇰' },
+  { code:'mg', name:'Malagasy', flag:'🇲🇬' },
+  { code:'ms', name:'Bahasa Melayu (Malay)', flag:'🇲🇾' },
+  { code:'ml', name:'മലയാളം (Malayalam)', flag:'🇮🇳' },
+  { code:'mt', name:'Malti (Maltese)', flag:'🇲🇹' },
+  { code:'mi', name:'Te Reo Māori (Maori)', flag:'🇳🇿' },
+  { code:'mr', name:'मराठी (Marathi)', flag:'🇮🇳' },
+  { code:'mn', name:'Монгол (Mongolian)', flag:'🇲🇳' },
+  { code:'my', name:'မြန်မာ (Burmese)', flag:'🇲🇲' },
+  { code:'ne', name:'नेपाली (Nepali)', flag:'🇳🇵' },
+  { code:'no', name:'Norsk (Norwegian)', flag:'🇳🇴' },
+  { code:'ps', name:'پښتو (Pashto)', flag:'🇦🇫' },
+  { code:'fa', name:'فارسی / دری (Persian/Dari)', flag:'🇮🇷' },
+  { code:'pl', name:'Polski (Polish)', flag:'🇵🇱' },
+  { code:'pt', name:'Português (Portuguese)', flag:'🇵🇹' },
+  { code:'pa', name:'ਪੰਜਾਬੀ (Punjabi)', flag:'🇵🇰' },
+  { code:'ro', name:'Română (Romanian)', flag:'🇷🇴' },
+  { code:'ru', name:'Русский (Russian)', flag:'🇷🇺' },
+  { code:'sm', name:'Samoa (Samoan)', flag:'🇼🇸' },
+  { code:'sr', name:'Српски (Serbian)', flag:'🇷🇸' },
+  { code:'sn', name:'chiShona (Shona)', flag:'🇿🇼' },
+  { code:'sd', name:'سنڌي (Sindhi)', flag:'🇵🇰' },
+  { code:'si', name:'සිංහල (Sinhala)', flag:'🇱🇰' },
+  { code:'sk', name:'Slovenčina (Slovak)', flag:'🇸🇰' },
+  { code:'sl', name:'Slovenščina (Slovenian)', flag:'🇸🇮' },
+  { code:'so', name:'Soomaali (Somali)', flag:'🇸🇴' },
+  { code:'es', name:'Español (Spanish)', flag:'🇪🇸' },
+  { code:'su', name:'Basa Sunda (Sundanese)', flag:'🇮🇩' },
+  { code:'sw', name:'Kiswahili (Swahili)', flag:'🇹🇿' },
+  { code:'sv', name:'Svenska (Swedish)', flag:'🇸🇪' },
+  { code:'tg', name:'Тоҷикӣ (Tajik)', flag:'🇹🇯' },
+  { code:'ta', name:'தமிழ் (Tamil)', flag:'🇮🇳' },
+  { code:'tt', name:'Татар (Tatar)', flag:'🇷🇺' },
+  { code:'te', name:'తెలుగు (Telugu)', flag:'🇮🇳' },
+  { code:'th', name:'ภาษาไทย (Thai)', flag:'🇹🇭' },
+  { code:'ti', name:'ትግርኛ (Tigrinya)', flag:'🇪🇷' },
+  { code:'tr', name:'Türkçe (Turkish)', flag:'🇹🇷' },
+  { code:'tk', name:'Türkmençe (Turkmen)', flag:'🇹🇲' },
+  { code:'uk', name:'Українська (Ukrainian)', flag:'🇺🇦' },
+  { code:'ur', name:'اردو (Urdu)', flag:'🇵🇰' },
+  { code:'ug', name:'ئۇيغۇرچە (Uyghur)', flag:'🇨🇳' },
+  { code:'uz', name:'Oʻzbekcha (Uzbek)', flag:'🇺🇿' },
+  { code:'vi', name:'Tiếng Việt (Vietnamese)', flag:'🇻🇳' },
+  { code:'cy', name:'Cymraeg (Welsh)', flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿' },
+  { code:'xh', name:'isiXhosa (Xhosa)', flag:'🇿🇦' },
+  { code:'yi', name:'ייִדיש (Yiddish)', flag:'🏴' },
+  { code:'yo', name:'Yorùbá (Yoruba)', flag:'🇳🇬' },
+  { code:'zu', name:'isiZulu (Zulu)', flag:'🇿🇦' },
+];
+
+let userLang = 'en';
+
+function getLangName() {
+  return LANGUAGES.find(l=>l.code===userLang)?.name || 'English';
+}
+
+function getLangFlag() {
+  return LANGUAGES.find(l=>l.code===userLang)?.flag || '🇬🇧';
+}
+
+function saveLang(code) {
+  userLang = code;
+  try { localStorage.setItem(LANG_KEY, code); } catch(e) {}
+  try { window.storage.set(LANG_KEY, code); } catch(e) {}
+  const flag = getLangFlag();
+  document.getElementById('lang-flag-btn').textContent = flag + ' ' + code.toUpperCase();
+  // Trigger UI translation
+  loadUIStrings(code);
+}
+
+function loadLang() {
+  try {
+    const stored = localStorage.getItem(LANG_KEY);
+    if (stored) { userLang = stored; return; }
+  } catch(e) {}
+}
+
+function showLangPicker() {
+  const grid = document.getElementById('lang-grid');
+  if (!grid) return;
+  grid.innerHTML = LANGUAGES.map(l => `
+    <div class="lang-option${l.code===userLang?' selected':''}" onclick="selectLang('${l.code}')">
+      <div class="flag">${l.flag}</div>
+      <div class="lang-name">${l.name}</div>
+    </div>`).join('');
+
+  // Show as modal
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px">🌍 Choose your language</div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:16px;line-height:1.6">Word entries and grammar notes will be explained in your chosen language.</div>
+    <input id="lang-search" type="text" placeholder="Search language..." autocomplete="off"
+      style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;margin-bottom:12px;"
+      oninput="filterLangs(this.value)" />
+    <div id="lang-dropdown-list" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
+      ${LANGUAGES.map(l => `
+        <div class="lang-row${l.code===userLang?' lang-row-selected':''}" onclick="selectLangModal('${l.code}')"
+          style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;cursor:pointer;border:1px solid ${l.code===userLang?'var(--accent)':'var(--border)'};background:${l.code===userLang?'rgba(79,142,247,.1)':'var(--surface2)'};transition:all 0.15s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="if(!this.classList.contains('lang-row-selected'))this.style.borderColor='var(--border)'"
+          data-name="${l.name.toLowerCase()}" data-code="${l.code}">
+          <span style="font-size:20px">${l.flag}</span>
+          <span style="font-size:13px;color:var(--text)">${l.name}</span>
+          ${l.code===userLang?'<span style="margin-left:auto;color:var(--accent);font-size:11px">✓ Current</span>':''}
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('modal-bg').style.display = 'flex';
+  setTimeout(() => document.getElementById('lang-search')?.focus(), 100);
+}
+
+function selectLangModal(code) {
+  saveLang(code);
+  closeModal();
+}
+
+function filterLangs(q) {
+  document.querySelectorAll('#lang-dropdown-list .lang-row').forEach(el => {
+    el.style.display = (el.dataset.name.includes(q.toLowerCase()) || el.dataset.code.includes(q.toLowerCase())) ? 'flex' : 'none';
+  });
+}
+
+function selectLang(code) {
+  saveLang(code);
+  document.querySelectorAll('#lang-grid .lang-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+// ── ONBOARDING ────────────────────────────────────────────────
+let onboardStep = 0;
+const ONBOARD_STEPS = 6;
+
+function buildOnboardDots() {
+  const dots = document.getElementById('onboard-dots');
+  if (!dots) return;
+  dots.innerHTML = Array.from({length:ONBOARD_STEPS}, (_,i) =>
+    `<div class="onboard-dot${i===0?' active':''}" id="dot-${i}"></div>`).join('');
+}
+
+function onboardNav(dir) {
+  // On step 0 validate language selection
+  if (onboardStep === 0 && dir === 1) {
+    // Save selected lang from grid
+    const sel = document.querySelector('#onboard-step-0 .lang-option.selected');
+    if (sel) {
+      const code = sel.getAttribute('onclick').match(/'([^']+)'/)[1];
+      saveLang(code);
+    }
+  }
+
+  onboardStep = Math.max(0, Math.min(ONBOARD_STEPS-1, onboardStep + dir));
+
+  // Update steps
+  document.querySelectorAll('.onboard-step').forEach((el,i) => {
+    el.classList.toggle('active', i===onboardStep);
+  });
+
+  // Update dots
+  document.querySelectorAll('.onboard-dot').forEach((el,i) => {
+    el.classList.toggle('active', i===onboardStep);
+  });
+
+  // Update buttons
+  const back = document.getElementById('onboard-back');
+  const next = document.getElementById('onboard-next');
+  if (back) back.style.display = onboardStep > 0 ? 'block' : 'none';
+  if (next) next.textContent = onboardStep === ONBOARD_STEPS-1 ? 'Start learning →' : 'Next →';
+
+  // Last step — finish
+  if (onboardStep === ONBOARD_STEPS-1 && dir === 1 && next.textContent === 'Start learning →') {
+    // already on last, next click finishes
+    next.onclick = finishOnboard;
+  }
+}
+
+function finishOnboard() {
+  try { localStorage.setItem(ONBOARD_KEY, '1'); } catch(e) {}
+  try { window.storage.set(ONBOARD_KEY, '1'); } catch(e) {}
+  document.getElementById('onboard-bg').style.display = 'none';
+  loadSampleContent();
+}
+
+function buildLangGrid() {
+  const grid = document.getElementById('lang-grid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <input id="onboard-lang-search" type="text" placeholder="Search language..." autocomplete="off"
+      style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;margin-bottom:10px;"
+      oninput="filterOnboardLangs(this.value)" />
+    <div id="onboard-lang-list" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
+      ${LANGUAGES.map(l => `
+        <div onclick="selectOnboardLang('${l.code}')" data-code="${l.code}" data-name="${l.name.toLowerCase()}"
+          class="onboard-lang-row${l.code==='en'?' selected-row':''}"
+          style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;cursor:pointer;border:1px solid ${l.code==='en'?'var(--accent)':'var(--border)'};background:${l.code==='en'?'rgba(79,142,247,.1)':'var(--surface2)'};transition:all 0.15s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="if(!this.classList.contains('selected-row'))this.style.borderColor='var(--border)'">
+          <span style="font-size:18px">${l.flag}</span>
+          <span style="font-size:12px;color:var(--text)">${l.name}</span>
+          ${l.code==='en'?'<span style="margin-left:auto;color:var(--accent);font-size:10px">✓</span>':''}
+        </div>`).join('')}
+    </div>`;
+}
+
+function filterOnboardLangs(q) {
+  document.querySelectorAll('#onboard-lang-list .onboard-lang-row').forEach(el => {
+    el.style.display = el.dataset.name.includes(q.toLowerCase()) || el.dataset.code.includes(q.toLowerCase()) ? 'flex' : 'none';
+  });
+}
+
+function selectOnboardLang(code) {
+  document.querySelectorAll('#onboard-lang-list .onboard-lang-row').forEach(el => {
+    const selected = el.dataset.code === code;
+    el.classList.toggle('selected-row', selected);
+    el.style.borderColor = selected ? 'var(--accent)' : 'var(--border)';
+    el.style.background = selected ? 'rgba(79,142,247,.1)' : 'var(--surface2)';
+    const tick = el.querySelector('span:last-child');
+    if (tick && tick.textContent === '✓') tick.remove();
+    if (selected) el.innerHTML += '<span style="margin-left:auto;color:var(--accent);font-size:10px">✓</span>';
+  });
+  saveLang(code);
+}
+
+async function checkOnboard() {
+  let done = false;
+  try { done = !!localStorage.getItem(ONBOARD_KEY); } catch(e) {}
+  if (!done) {
+    try {
+      const r = await window.storage.get(ONBOARD_KEY);
+      if (r && r.value) done = true;
+    } catch(e) {}
+  }
+  if (!done) {
+    buildOnboardDots();
+    buildLangGrid();
+    document.getElementById('onboard-bg').style.display = 'flex';
+    document.getElementById('onboard-next').onclick = () => onboardNav(1);
+  }
+}
+
+// ── SAMPLE CONTENT ────────────────────────────────────────────
+function loadSampleContent() {
+  if (saved.length > 0 || idioms.length > 0) return; // don't overwrite real data
+
+  const sampleWords = [
+    { norwegian:'å lære', english:'to learn', ipa:'oː ˈlæːrə', register:'neutral', word_class:'verb', gender:null,
+      forms:[{label:'Infinitive',value:'å lære'},{label:'Present',value:'lærer'},{label:'Simple past',value:'lærte'},{label:'Past participle',value:'lært'}],
+      examples:[{no:'Jeg lærer norsk på språksenteret.',en:'I am learning Norwegian at the language centre.'},{no:'Hun lærte seg å sykle som barn.',en:'She learned to cycle as a child.'}],
+      grammar_note:'Weak verb, group 2. Present tense adds -er. Do not confuse with å lese (to read).',
+      related:['å studere','å forstå','å undervise'], savedAt: new Date().toISOString() },
+    { norwegian:'en venn', english:'a friend', ipa:'ɛn vɛnː', register:'neutral', word_class:'noun', gender:'en',
+      forms:[{label:'Indefinite sg',value:'en venn'},{label:'Definite sg',value:'vennen'},{label:'Indefinite pl',value:'venner'},{label:'Definite pl',value:'vennene'}],
+      examples:[{no:'Jeg har mange venner på skolen.',en:'I have many friends at school.'},{no:'Vennen min heter Kari.',en:'My friend is called Kari.'}],
+      grammar_note:'Masculine noun. Note the double n in vennen (definite). Plural venner drops one n.',
+      related:['bekjent','kamerat','vennskap'], savedAt: new Date().toISOString() },
+    { norwegian:'å forstå', english:'to understand', ipa:'oː fɔˈstoː', register:'neutral', word_class:'verb', gender:null,
+      forms:[{label:'Infinitive',value:'å forstå'},{label:'Present',value:'forstår'},{label:'Simple past',value:'forstod'},{label:'Past participle',value:'forstått'}],
+      examples:[{no:'Forstår du hva jeg sier?',en:'Do you understand what I am saying?'},{no:'Jeg forstod ikke oppgaven.',en:'I did not understand the assignment.'}],
+      grammar_note:'Strong verb with irregular past tense forstod. Very high frequency — one of the most useful verbs for a language learner.',
+      related:['å skjønne','å oppfatte','å tolke'], savedAt: new Date().toISOString() }
+  ];
+
+  const sampleIdiom = {
+    idiom:'å slå to fluer i en smekk', literal:'to hit two flies with one swat',
+    meaning:'to accomplish two things with one action — equivalent to "kill two birds with one stone"',
+    ipa:'oː sloː tuː ˈfluːər i ɛn smɛkː', register:'informal',
+    example:{ no:'Jeg handlet og møtte en venn — å slå to fluer i en smekk!', en:'I went shopping and met a friend — killing two birds with one stone!' },
+    cultural_note:'Norwegians use smekk (a swat or slap) rather than a stone, reflecting a more domestic and less violent image. The idiom is widely used across all age groups.',
+    related:['å ta to ting på en gang','å utnytte tiden godt'], savedAt: new Date().toISOString()
+  };
+
+  saved = sampleWords;
+  idioms = [sampleIdiom];
+  persist();
+  persistIdioms();
+  updateStats();
+}
+
+// Patch system prompt to use userLang
+const origDoLookup = doLookup;
+
+// ── INIT ──────────────────────────────────────────────────────
+async function init() {
+  loadLang();
+  document.getElementById('lang-flag-btn').textContent = getLangFlag() + ' ' + userLang.toUpperCase();
+  await hydrate();
+  await loadUIStrings(userLang);
+  await checkOnboard();
+}
+
+init();
+</script>
+</body>
+</html>
