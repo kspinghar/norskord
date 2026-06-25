@@ -170,6 +170,23 @@ body {
 .help-step-num { background: var(--accent); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
 .help-step-text { font-size: 13px; color: var(--muted2); line-height: 1.7; }
 .help-step-text strong { color: var(--text); }
+
+/* CONNECT-AI MODAL + DEMO */
+.key-label { display:block; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin:14px 0 6px; }
+.key-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:11px 14px; color:var(--text); font-family:'DM Mono',monospace; font-size:13px; outline:none; transition:border-color 0.2s; }
+.key-input:focus { border-color:var(--accent); }
+.key-hint { font-size:11.5px; color:var(--muted2); line-height:1.6; margin-top:8px; }
+.key-hint a { color:var(--accent); }
+.btn-primary { background:var(--accent); border:none; border-radius:8px; padding:11px 20px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; cursor:pointer; letter-spacing:0.3px; }
+.btn-primary:hover { opacity:0.9; }
+.btn-ghost { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:11px 18px; color:var(--muted2); font-family:'DM Mono',monospace; font-size:12px; cursor:pointer; }
+.btn-ghost:hover { border-color:var(--red); color:var(--red); }
+.info-box { background:rgba(79,142,247,.07); border:1px solid rgba(79,142,247,.25); border-radius:10px; padding:18px 20px; font-size:13px; color:var(--muted2); line-height:1.7; }
+.info-box strong { color:var(--text); }
+#demo-hint { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:14px 0 0; }
+.demo-hint-label { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+.demo-chip { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:5px 11px; font-size:12px; color:var(--muted2); cursor:pointer; transition:all 0.18s; }
+.demo-chip:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -220,7 +237,7 @@ body {
       <div class="onboard-step" id="onboard-step-5">
         <div class="onboard-icon">✓</div>
         <div class="onboard-title" data-i18n="onboard_ready_title">You're ready</div>
-        <div class="onboard-body" data-i18n="onboard_ready_body">NorskOrd works inside Claude or ChatGPT — just upload this HTML file to your chat. Your word bank, idioms and progress are saved automatically. Visit the Help tab anytime for a reminder.</div>
+        <div class="onboard-body" data-i18n="onboard_ready_body">Try the free demo words right away. To look up any word, tap ⚷ Connect AI (top right) and paste a key from Claude, ChatGPT, Gemini or another provider — it stays in your browser. Your word bank and progress save automatically. See the Help tab anytime.</div>
       </div>
 
       <div class="onboard-nav">
@@ -239,6 +256,7 @@ body {
     <div class="stats">
       <div class="stat"><span data-i18n="stat_saved">Saved</span>: <strong id="n-saved">0</strong></div>
       <div class="stat"><span data-i18n="stat_session">Session</span>: <strong id="n-session">0</strong></div>
+      <button onclick="openKeyModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" id="key-btn">⚷ Connect AI</button>
       <button onclick="showLangPicker()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'" id="lang-flag-btn">🌍 EN</button>
     </div>
   </div>
@@ -263,6 +281,7 @@ body {
       </div>
       <button class="lookup-btn" id="go-btn" onclick="doLookup()" data-i18n="lookup_btn">Look up</button>
     </div>
+    <div id="demo-hint"></div>
     <div id="err"></div>
     <div id="loading"></div>
     <div id="result"></div>
@@ -409,23 +428,23 @@ body {
       <div style="font-size:13px;color:var(--muted2);line-height:1.8">NorskOrd is a Norwegian vocabulary builder powered by AI. Look up any word or phrase and get a full linguistic breakdown including translation, IPA pronunciation, all word forms, grammar notes and example sentences — in your own language.</div>
     </div>
 
-    <div class="help-card">
-      <div class="help-card-title">💬 How to get this app</div>
+    <div class="help-card" style="border-color:var(--accent)">
+      <div class="help-card-title">⚷ How to connect your AI (one-time setup)</div>
       <div class="help-step">
         <div class="help-step-num">1</div>
-        <div class="help-step-text">Go to <strong>github.com/kspinghar/norskord</strong> and download the file <strong>norskord.html</strong></div>
+        <div class="help-step-text">The <strong>demo words</strong> work right away with no setup. To look up <strong>any</strong> word, you connect your own AI once.</div>
       </div>
       <div class="help-step">
         <div class="help-step-num">2</div>
-        <div class="help-step-text">Open your AI chat — <strong>Claude (claude.ai)</strong> or <strong>ChatGPT (chatgpt.com)</strong></div>
+        <div class="help-step-text">Get an API key from any provider you like — <strong>Anthropic (Claude)</strong>, <strong>OpenAI (ChatGPT)</strong>, <strong>Google (Gemini)</strong>, or any OpenAI-compatible service.</div>
       </div>
       <div class="help-step">
         <div class="help-step-num">3</div>
-        <div class="help-step-text">Click the <strong>paperclip / attachment icon</strong> in the chat input and upload <strong>norskord.html</strong></div>
+        <div class="help-step-text">Click <strong>⚷ Connect AI</strong> in the top-right, pick your provider, and paste the key. That's it.</div>
       </div>
       <div class="help-step">
         <div class="help-step-num">4</div>
-        <div class="help-step-text">The app opens automatically. <strong>No setup, no account, no cost.</strong> Your word bank saves automatically each session.</div>
+        <div class="help-step-text">Your key is saved <strong>only in your browser</strong> and is sent only to the provider you chose. Your word bank and progress also save automatically.</div>
       </div>
     </div>
 
@@ -482,6 +501,246 @@ const HFW_KEY = 'norskord-hfw-v1';
 const IDIOMS_KEY = 'norskord-idioms-v1';
 let hfwData = { tier: 1, covered: 0, sets: [], notes: [] };
 let idioms = [];
+
+// ══════════════════════════════════════════════════════════════
+//  AI PROVIDERS — bring-your-own-key, works with any major model
+//  Each provider knows its endpoint, auth headers, request body
+//  and how to read the reply. "custom" speaks the OpenAI format,
+//  so it also covers OpenRouter, Groq, Together, Ollama, etc.
+// ══════════════════════════════════════════════════════════════
+const APIKEY_KEY    = 'norskord-apikey';
+const PROVIDER_KEY  = 'norskord-provider';
+const MODEL_KEY     = 'norskord-model';
+const CUSTOMURL_KEY = 'norskord-custom-url';
+
+const PROVIDERS = {
+  anthropic: {
+    label: 'Anthropic (Claude)',
+    defaultModel: 'claude-3-5-sonnet-latest',
+    keyHint: 'sk-ant-...',
+    keysUrl: 'https://console.anthropic.com/settings/keys',
+    endpoint: () => 'https://api.anthropic.com/v1/messages',
+    headers: (key) => ({
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    }),
+    body: (model, sys, msg) => ({
+      model, max_tokens: 1500,
+      system: sys || undefined,
+      messages: [{ role: 'user', content: msg }]
+    }),
+    parse: (data) => (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('')
+  },
+  openai: {
+    label: 'OpenAI (ChatGPT / GPT)',
+    defaultModel: 'gpt-4o-mini',
+    keyHint: 'sk-...',
+    keysUrl: 'https://platform.openai.com/api-keys',
+    endpoint: () => 'https://api.openai.com/v1/chat/completions',
+    headers: (key) => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }),
+    body: (model, sys, msg) => ({
+      model,
+      messages: (sys ? [{ role: 'system', content: sys }] : []).concat([{ role: 'user', content: msg }]),
+      response_format: { type: 'json_object' }
+    }),
+    parse: (data) => data.choices?.[0]?.message?.content || ''
+  },
+  gemini: {
+    label: 'Google (Gemini)',
+    defaultModel: 'gemini-2.0-flash',
+    keyHint: 'AIza...',
+    keysUrl: 'https://aistudio.google.com/apikey',
+    endpoint: (key, model) => `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`,
+    headers: () => ({ 'Content-Type': 'application/json' }),
+    body: (model, sys, msg) => ({
+      systemInstruction: sys ? { parts: [{ text: sys }] } : undefined,
+      contents: [{ role: 'user', parts: [{ text: msg }] }],
+      generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 2048 }
+    }),
+    parse: (data) => (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('')
+  },
+  custom: {
+    label: 'Other / OpenAI-compatible',
+    defaultModel: '',
+    keyHint: 'your key',
+    keysUrl: 'https://openrouter.ai/keys',
+    endpoint: (key, model, base) => (base || 'https://openrouter.ai/api/v1').replace(/\/+$/, '') + '/chat/completions',
+    headers: (key) => ({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }),
+    body: (model, sys, msg) => ({
+      model,
+      messages: (sys ? [{ role: 'system', content: sys }] : []).concat([{ role: 'user', content: msg }])
+    }),
+    parse: (data) => data.choices?.[0]?.message?.content || ''
+  }
+};
+
+function getKey()        { try { return localStorage.getItem(APIKEY_KEY) || ''; } catch(e) { return ''; } }
+function getProvider()   { try { return localStorage.getItem(PROVIDER_KEY) || 'anthropic'; } catch(e) { return 'anthropic'; } }
+function getModelName()  { try { return localStorage.getItem(MODEL_KEY) || ''; } catch(e) { return ''; } }
+function getCustomBase() { try { return localStorage.getItem(CUSTOMURL_KEY) || ''; } catch(e) { return ''; } }
+
+// Provider-agnostic call. Returns the raw text reply (may contain JSON).
+async function callLLM(sys, msg) {
+  const p = PROVIDERS[getProvider()] || PROVIDERS.anthropic;
+  const key = getKey();
+  const model = getModelName() || p.defaultModel;
+  let res;
+  try {
+    res = await fetch(p.endpoint(key, model, getCustomBase()), {
+      method: 'POST', headers: p.headers(key), body: JSON.stringify(p.body(model, sys, msg))
+    });
+  } catch(e) {
+    throw new Error('Could not reach the AI provider (network or CORS). Check your connection or try a different provider.');
+  }
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    if (res.status === 401 || res.status === 403)
+      throw new Error(`Your API key was rejected (${res.status}). Open ⚷ Connect AI and check the key and provider.`);
+    throw new Error(`AI provider error ${res.status}. ${t.slice(0, 160)}`);
+  }
+  const data = await res.json().catch(() => { throw new Error('Could not read the AI response.'); });
+  return p.parse(data) || '';
+}
+
+// ── DEMO ENTRIES (work with NO key, NO cost) ──────────────────
+const DEMO_DATA = [
+  { keys:['hente','to fetch','fetch','pick up'], norwegian:'å hente', english:'to fetch, to pick up, to collect',
+    ipa:'ˈhɛntə', register:'neutral', word_class:'verb', gender:null,
+    forms:[{label:'Infinitive',value:'hente'},{label:'Present',value:'henter'},{label:'Simple past',value:'hentet'},{label:'Past participle',value:'hentet'}],
+    examples:[{no:'Kan du hente meg fra stasjonen?',en:'Can you pick me up from the station?'},{no:'Jeg må hente barna fra skolen.',en:'I have to pick up the children from school.'}],
+    grammar_note:'Regular (weak) verb in the -et group. Means to go and get someone or something and bring it back.', related:['å bringe','å samle','å plukke opp'] },
+  { keys:['snakke','to speak','to talk','speak','talk'], norwegian:'å snakke', english:'to speak, to talk',
+    ipa:'ˈsnɑkə', register:'neutral', word_class:'verb', gender:null,
+    forms:[{label:'Infinitive',value:'snakke'},{label:'Present',value:'snakker'},{label:'Simple past',value:'snakket'},{label:'Past participle',value:'snakket'}],
+    examples:[{no:'Snakker du norsk?',en:'Do you speak Norwegian?'},{no:'Vi snakket lenge i går.',en:'We talked for a long time yesterday.'}],
+    grammar_note:'Very common -et group verb. Use "snakke med" for "talk with" and "snakke om" for "talk about".', related:['å prate','å si','å fortelle'] },
+  { keys:['bok','book','a book'], norwegian:'en bok', english:'a book',
+    ipa:'buːk', register:'neutral', word_class:'noun', gender:'en',
+    forms:[{label:'Indefinite sg',value:'en bok'},{label:'Definite sg',value:'boka / boken'},{label:'Indefinite pl',value:'bøker'},{label:'Definite pl',value:'bøkene'}],
+    examples:[{no:'Jeg leser en god bok.',en:'I am reading a good book.'},{no:'Bøkene står i hylla.',en:'The books are on the shelf.'}],
+    grammar_note:'A common-gender (en) noun with an irregular plural: bok → bøker (vowel change).', related:['å lese','et bibliotek','en roman'] },
+  { keys:['hus','house','a house'], norwegian:'et hus', english:'a house',
+    ipa:'hʉːs', register:'neutral', word_class:'noun', gender:'et',
+    forms:[{label:'Indefinite sg',value:'et hus'},{label:'Definite sg',value:'huset'},{label:'Indefinite pl',value:'hus'},{label:'Definite pl',value:'husene'}],
+    examples:[{no:'De bor i et stort hus.',en:'They live in a big house.'},{no:'Huset er gammelt.',en:'The house is old.'}],
+    grammar_note:'A neuter (et) noun. Neuter nouns of one syllable usually have the same form in the indefinite plural: et hus → flere hus.', related:['en leilighet','et hjem','en hytte'] },
+  { keys:['fin','nice','fine','pretty'], norwegian:'fin', english:'nice, fine, pretty',
+    ipa:'fiːn', register:'neutral', word_class:'adjective', gender:null,
+    forms:[{label:'Masculine/Feminine',value:'fin'},{label:'Neuter',value:'fint'},{label:'Plural/Definite',value:'fine'},{label:'Comparative',value:'finere'},{label:'Superlative',value:'finest'}],
+    examples:[{no:'For en fin dag!',en:'What a nice day!'},{no:'Det var veldig fint av deg.',en:'That was very kind of you.'}],
+    grammar_note:'Agrees with the noun: fin (en), fint (et), fine (plural/definite). "Fint" also works as "fine/okay" on its own.', related:['pen','vakker','hyggelig'] },
+  { keys:['venn','friend','a friend'], norwegian:'en venn', english:'a friend',
+    ipa:'vɛnː', register:'neutral', word_class:'noun', gender:'en',
+    forms:[{label:'Indefinite sg',value:'en venn'},{label:'Definite sg',value:'vennen'},{label:'Indefinite pl',value:'venner'},{label:'Definite pl',value:'vennene'}],
+    examples:[{no:'Han er en god venn.',en:'He is a good friend.'},{no:'Jeg møtte vennene mine.',en:'I met my friends.'}],
+    grammar_note:'Common-gender noun. A female friend is often "ei/en venninne".', related:['en kompis','en venninne','et vennskap'] },
+  { keys:['takk','thanks','thank you'], norwegian:'takk', english:'thanks, thank you',
+    ipa:'tɑkː', register:'neutral', word_class:'phrase', gender:null, forms:[],
+    examples:[{no:'Tusen takk for hjelpen!',en:'Thank you so much for the help!'},{no:'Ja takk, gjerne.',en:'Yes please, gladly.'}],
+    grammar_note:'Core politeness word. "Tusen takk" = thanks a lot; "ja takk" = yes please; "nei takk" = no thank you.', related:['vær så snill','unnskyld','bare hyggelig'] },
+  { keys:['liksom','like','sort of','kind of'], norwegian:'liksom', english:'like, sort of, kind of (filler / hedging word)',
+    ipa:'ˈlɪ̀ksɔm', register:'slang', word_class:'phrase', gender:null, forms:[],
+    examples:[{no:'Det var liksom ikke så viktig.',en:'It was, like, not that important.'},{no:'Hun bare liksom forsvant.',en:'She sort of just disappeared.'}],
+    grammar_note:'Very common spoken filler, similar to English "like". In formal writing the neutral equivalent is "på en måte" (in a way).', related:['på en måte','kind of','ligesom'] }
+];
+const DEMO_INDEX = (() => { const m = {}; DEMO_DATA.forEach(d => { (d.keys||[]).forEach(k => m[normalise(k)] = d); m[normalise(d.norwegian)] = d; }); return m; })();
+
+function renderDemoHint() {
+  const el = document.getElementById('demo-hint');
+  if (!el) return;
+  const words = DEMO_DATA.map(d => d.norwegian.replace(/^å\s+/, ''));
+  el.innerHTML = `<span class="demo-hint-label">${getKey() ? 'Try a demo word:' : 'Try these free demo words (no setup):'}</span>` +
+    words.map(w => `<span class="demo-chip" onclick="quickDemoLookup('${w}')">${w}</span>`).join('');
+}
+function quickDemoLookup(word) {
+  document.getElementById('q').value = word;
+  setLang('no');
+  switchTab('lookup');
+  doLookup();
+}
+
+// ── CONNECT-AI MODAL ──────────────────────────────────────────
+function renderKeyBtn() {
+  const btn = document.getElementById('key-btn');
+  if (!btn) return;
+  if (getKey()) { btn.textContent = '⚷ AI connected'; btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)'; }
+  else { btn.textContent = '⚷ Connect AI'; btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--muted2)'; }
+}
+function showConnectPrompt(targetId, q) {
+  document.getElementById(targetId).innerHTML = `
+    <div class="info-box">
+      <strong>Connect your AI to look up ${q ? '“' + escapeHtml(q) + '”' : 'this'}.</strong><br>
+      The demo words work with no setup. For anything else, connect your own AI in one step —
+      Claude, ChatGPT, Gemini, or another provider. Your key is stored only in this browser and used only for your own lookups.<br><br>
+      <button class="btn-primary" onclick="openKeyModal()">⚷ Connect your AI</button>
+    </div>`;
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function openKeyModal() {
+  const existing = getKey(), prov = getProvider(), model = getModelName(), base = getCustomBase();
+  const esc = s => (s || '').replace(/"/g, '&quot;');
+  const opts = Object.entries(PROVIDERS).map(([id,p]) => `<option value="${id}" ${id===prov?'selected':''}>${p.label}</option>`).join('');
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:6px">Connect your AI</div>
+    <div style="font-size:12.5px;color:var(--muted2);line-height:1.7;margin-bottom:16px">
+      NorskOrd uses an AI model to look up words. Pick whichever provider you have an account with,
+      paste your key, and you're done. Everything is saved only in this browser — nothing is sent anywhere except the provider you choose.
+    </div>
+    <label class="key-label">1 · Choose your provider</label>
+    <select id="prov-field" class="key-input" onchange="onProvChange()">${opts}</select>
+    <label class="key-label">2 · Paste your API key</label>
+    <input id="key-field" class="key-input" type="password" value="${esc(existing)}" autocomplete="off" />
+    <div id="prov-hint" class="key-hint"></div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;font-size:12px;color:var(--muted2)">Advanced (optional): model &amp; custom server</summary>
+      <label class="key-label">Model <span style="opacity:.7">(leave blank for the default)</span></label>
+      <input id="model-field" class="key-input" type="text" value="${esc(model)}" />
+      <div id="base-row" style="display:none">
+        <label class="key-label">Server base URL (OpenAI-compatible)</label>
+        <input id="base-field" class="key-input" type="text" placeholder="https://openrouter.ai/api/v1" value="${esc(base)}" />
+      </div>
+    </details>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn-primary" onclick="saveKey()">Save &amp; connect</button>
+      ${existing ? '<button class="btn-ghost" onclick="clearKey()">Disconnect</button>' : ''}
+    </div>`;
+  document.getElementById('modal-bg').style.display = 'flex';
+  onProvChange();
+}
+function onProvChange() {
+  const sel = document.getElementById('prov-field');
+  const p = PROVIDERS[sel.value] || PROVIDERS.anthropic;
+  document.getElementById('key-field').placeholder = p.keyHint;
+  document.getElementById('model-field').placeholder = p.defaultModel || 'e.g. anthropic/claude-3.5-sonnet';
+  const baseRow = document.getElementById('base-row');
+  if (baseRow) baseRow.style.display = (sel.value === 'custom') ? 'block' : 'none';
+  const extra = sel.value === 'custom'
+    ? '<br>Works with any OpenAI-compatible service (OpenRouter, Groq, Together, local Ollama/LM Studio). A few servers block in-browser calls.'
+    : '';
+  document.getElementById('prov-hint').innerHTML =
+    `No key yet? Get one here: <a href="${p.keysUrl}" target="_blank" rel="noopener">${p.keysUrl.replace('https://','')}</a>${extra}`;
+}
+function saveKey() {
+  const v = document.getElementById('key-field').value.trim();
+  const prov = document.getElementById('prov-field').value;
+  const model = document.getElementById('model-field').value.trim();
+  const baseEl = document.getElementById('base-field');
+  const base = baseEl ? baseEl.value.trim() : '';
+  try {
+    if (v) localStorage.setItem(APIKEY_KEY, v); else localStorage.removeItem(APIKEY_KEY);
+    localStorage.setItem(PROVIDER_KEY, prov);
+    if (model) localStorage.setItem(MODEL_KEY, model); else localStorage.removeItem(MODEL_KEY);
+    if (base) localStorage.setItem(CUSTOMURL_KEY, base); else localStorage.removeItem(CUSTOMURL_KEY);
+  } catch(e) {}
+  renderKeyBtn(); renderDemoHint(); closeModal();
+}
+function clearKey() {
+  try { localStorage.removeItem(APIKEY_KEY); } catch(e) {}
+  renderKeyBtn(); renderDemoHint(); closeModal();
+}
 
 async function persist() {
   const json = JSON.stringify(saved);
@@ -579,6 +838,13 @@ async function doLookup() {
 
   document.getElementById('err').innerHTML = '';
   document.getElementById('result').innerHTML = '';
+
+  // Demo words work instantly with no key or cost.
+  const demoEntry = DEMO_INDEX[normalise(q)];
+  if (demoEntry) { curEntry = demoEntry; sessions++; updateStats(); renderEntry(demoEntry, 'result', false); return; }
+  // No AI connected yet → invite the user to connect one.
+  if (!getKey()) { showConnectPrompt('result', q); return; }
+
   document.getElementById('loading').innerHTML = `
     <div class="loading-state">
       <div class="dots"><span></span><span></span><span></span></div>
@@ -619,19 +885,7 @@ Always provide accurate IPA for Norwegian Bokmål pronunciation.`;
     : `Norwegian input: "${q}" — give me the full linguistic entry`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: sys,
-        messages: [{ role:'user', content: msg }]
-      })
-    });
-
-    const data = await res.json();
-    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    const raw = await callLLM(sys, msg);
     let entry;
     try {
       entry = JSON.parse(raw.replace(/```json|```/g,'').trim());
@@ -700,7 +954,7 @@ function renderEntry(e, targetId, inModal) {
     : '';
 
   const genderTag = e.gender ? `<span class="tag tag-en">${e.gender}</span>` : '';
-  const regColors = { formal:'tag-adverb', informal:'tag-adj', slang:'tag-phrase', neutral:'tag-other' };
+  const regColors = { formal:'tag-adverb', informal:'tag-adjective', slang:'tag-phrase', neutral:'tag-other' };
   const registerTag = e.register && e.register !== 'neutral'
     ? `<span class="tag ${regColors[e.register]||'tag-other'}">${e.register}</span>`
     : '';
@@ -954,6 +1208,7 @@ document.getElementById('idiom-q').addEventListener('keydown', e => { if(e.key==
 async function lookupIdiom() {
   const q = document.getElementById('idiom-q').value.trim();
   if (!q) return;
+  if (!getKey()) { document.getElementById('idiom-err').innerHTML=''; document.getElementById('idiom-loading').innerHTML=''; showConnectPrompt('idiom-result', q); return; }
 
   document.getElementById('idiom-err').innerHTML = '';
   document.getElementById('idiom-result').innerHTML = '';
@@ -985,19 +1240,7 @@ If the input is English, find the closest Norwegian idiomatic equivalent.`;
   const msg = `Look up this Norwegian idiom or expression: "${q}"`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: sys,
-        messages: [{ role:'user', content: msg }]
-      })
-    });
-
-    const data = await res.json();
-    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    const raw = await callLLM(sys, msg);
     let entry;
     try { entry = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
     catch(e) { throw new Error('Parse error — please try again.'); }
@@ -1015,7 +1258,7 @@ If the input is English, find the closest Norwegian idiomatic equivalent.`;
 
 function renderIdiomEntry(e, targetId, inModal) {
   const alreadySaved = idioms.some(i => i.idiom === e.idiom);
-  const regColors = { formal:'tag-adverb', informal:'tag-adj', slang:'tag-phrase', neutral:'tag-other' };
+  const regColors = { formal:'tag-adverb', informal:'tag-adjective', slang:'tag-phrase', neutral:'tag-other' };
   const registerTag = e.register && e.register !== 'neutral'
     ? `<span class="tag ${regColors[e.register]||'tag-other'}">${e.register}</span>` : '';
 
@@ -1146,6 +1389,7 @@ const NORWEGIAN_IDIOM_CATEGORIES = [
 ];
 
 async function randomNorwegianIdiom() {
+  if (!getKey()) { document.getElementById('idiom-result').innerHTML=''; document.getElementById('idiom-err').innerHTML=''; showConnectPrompt('idiom-result', 'a random idiom'); return; }
   const category = NORWEGIAN_IDIOM_CATEGORIES[Math.floor(Math.random() * NORWEGIAN_IDIOM_CATEGORIES.length)];
   const alreadySeen = idioms.map(i => i.idiom);
 
@@ -1175,18 +1419,7 @@ Schema:
   const msg = `Give me one authentic, commonly used Norwegian idiom related to the theme of "${category}". ${alreadyStr} Make it genuinely interesting and culturally revealing.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
-        system: sys,
-        messages: [{ role:'user', content: msg }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    const raw = await callLLM(sys, msg);
     let entry;
     try { entry = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
     catch(e) { throw new Error('Parse error — try again.'); }
@@ -1219,6 +1452,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function findNorwegianEquivalent() {
   const q = document.getElementById('en-idiom-q').value.trim();
   if (!q) return;
+  if (!getKey()) { document.getElementById('en-idiom-err').innerHTML=''; document.getElementById('en-idiom-loading').innerHTML=''; showConnectPrompt('en-idiom-result', q); return; }
 
   document.getElementById('en-idiom-err').innerHTML = '';
   document.getElementById('en-idiom-result').innerHTML = '';
@@ -1247,18 +1481,7 @@ Schema:
 }`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
-        system: sys,
-        messages: [{ role:'user', content: `English idiom: "${q}" — find the Norwegian equivalent` }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    const raw = await callLLM(sys, `English idiom: "${q}" — find the Norwegian equivalent`);
     let entry;
     try { entry = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
     catch(e) { throw new Error('Parse error — try again.'); }
@@ -1331,7 +1554,7 @@ const DEFAULT_STRINGS = {
   onboard_idioms_title: 'Discover idioms',
   onboard_idioms_body: 'Look up Norwegian idioms, generate random ones by theme, or find the Norwegian equivalent of an English idiom. Idioms reveal how Norwegians actually think.',
   onboard_ready_title: "You're ready",
-  onboard_ready_body: 'NorskOrd works inside Claude or ChatGPT — just upload this HTML file to your chat. Your word bank, idioms and progress are saved automatically. Visit the Help tab anytime for a reminder.',
+  onboard_ready_body: 'Try the free demo words right away. To look up any word, tap ⚷ Connect AI (top right) and paste a key from Claude, ChatGPT, Gemini or another provider — it stays in your browser. Your word bank and progress save automatically. See the Help tab anytime.',
   onboard_back: 'Back',
   onboard_next: 'Get started →',
   onboard_finish: 'Start learning →',
@@ -1380,6 +1603,9 @@ async function loadUIStrings(langCode) {
     }
   } catch(e) {}
 
+  // Without a connected AI we can't translate the UI — fall back to English.
+  if (!getKey()) { uiStrings = { ...DEFAULT_STRINGS }; applyUIStrings(); return; }
+
   // Show loading indicator on logo-sub
   const logoSub = document.getElementById('logo-sub-lang');
   if (logoSub) logoSub.textContent = '...translating interface...';
@@ -1399,17 +1625,7 @@ Keys and current English values:
 ${JSON.stringify(Object.fromEntries(keys.map((k,i)=>[k,values[i]])), null, 2)}`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{ role:'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.find(b=>b.type==='text')?.text || '';
+    const raw = await callLLM('', prompt);
     const translated = JSON.parse(raw.replace(/```json|```/g,'').trim());
 
     uiStrings = { ...DEFAULT_STRINGS, ...translated };
@@ -1792,6 +2008,8 @@ async function init() {
   loadLang();
   document.getElementById('lang-flag-btn').textContent = getLangFlag() + ' ' + userLang.toUpperCase();
   await hydrate();
+  renderKeyBtn();
+  renderDemoHint();
   await loadUIStrings(userLang);
   await checkOnboard();
 }
